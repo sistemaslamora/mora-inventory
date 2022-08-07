@@ -6,7 +6,7 @@
         class="bg-cyan-8"
       >
         <q-toolbar>
-          <q-toolbar-title>Header</q-toolbar-title>
+          <q-toolbar-title>{{modelHeader}}</q-toolbar-title>
           <q-btn
             flat
             @click="drawer = !drawer"
@@ -28,6 +28,7 @@
             <q-item
               clickable
               v-ripple
+              @click="modelHeader = 'La Mora Pasteleria'"
               to="/"
             >
               <q-item-section avatar>
@@ -43,6 +44,7 @@
               active
               clickable
               v-ripple
+              @click="modelHeader = 'jean newman'"
               to="/Items"
             >
               <q-item-section avatar>
@@ -50,33 +52,37 @@
               </q-item-section>
 
               <q-item-section>
-                Items
+                Inicio
               </q-item-section>
             </q-item>
 
             <q-item
               clickable
               v-ripple
+              @click="modelHeader = 'test'"
+              to="/newinventorytemplate"
             >
               <q-item-section avatar>
                 <q-icon name="send" />
               </q-item-section>
 
               <q-item-section>
-                Send
+                Inventario
               </q-item-section>
             </q-item>
 
             <q-item
               clickable
               v-ripple
+              @click="modelHeader = 'Plantilla de Inventario Fisico'"
+              to="/inventorytemplate"
             >
               <q-item-section avatar>
                 <q-icon name="drafts" />
               </q-item-section>
 
               <q-item-section>
-                Drafts
+                Plantilla de Inventario
               </q-item-section>
             </q-item>
           </q-list>
@@ -112,8 +118,16 @@ import { ref } from 'vue'
 
 export default {
   setup () {
+    const modelHeader = ref('La Mora Pasteleria')
+
+    const onChangeHeader = () => {
+      modelHeader.value = 'Inventario Fisico'
+    }
     return {
-      drawer: ref(false)
+      drawer: ref(false),
+      modelHeader,
+      //
+      onChangeHeader
     }
   }
 }

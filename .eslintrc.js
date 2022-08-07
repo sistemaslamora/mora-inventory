@@ -99,7 +99,7 @@ module.exports = {
     '@typescript-eslint/no-empty-function': 'off',
     'vue/multi-word-component-names': 'off',
     'vue/multi-word-component-names': 'off',
-   
+    'vue/no-deprecated-slot-attribute': 'off',
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }

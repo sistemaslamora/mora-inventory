@@ -1,0 +1,36 @@
+/* CSS HEX */
+--akaroa: #d4bda0;
+--falu-red: #811715;
+--dune: #2a2523;
+--cape-palliser: #986a49;
+--saddle: #4f3125;
+--raw-sienna: #d0933d;
+--raw-sienna: #ce7f4d;
+--bouquet: #b17e8e;
+--vin-rouge: #8e3b67;
+
+
+/* SCSS HEX */
+$akaroa: #d4bda0;
+$falu-red: #811715;
+$dune: #2a2523;
+$cape-palliser: #986a49;
+$saddle: #4f3125;
+$raw-sienna: #d0933d;
+$raw-sienna: #ce7f4d;
+$bouquet: #b17e8e;
+$vin-rouge: #8e3b67;
+
+
+/* SCSS RGB */
+--akaroa: rgba(212,189,160,1);
+--falu-red: rgba(129,23,21,1);
+--dune: rgba(42,37,35,1);
+--cape-palliser: rgba(152,106,73,1);
+--saddle: rgba(79,49,37,1);
+--raw-sienna: rgba(208,147,61,1);
+--raw-sienna: rgba(206,127,77,1);
+--bouquet: rgba(177,126,142,1);
+--vin-rouge: rgba(142,59,103,1);
+
+

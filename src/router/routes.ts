@@ -6,7 +6,9 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
                 { path: '', component: () => import('pages/ToExcel.vue') },
-                { path: '/items', component: () => import('pages/ItemsSetting.vue') }
+                { path: '/items', component: () => import('pages/ItemsSetting.vue') },
+                { path: '/inventorytemplate', component: () => import('pages/InventoryTemplate.vue') },
+                { path: '/newinventorytemplate', component: () => import('pages/NewInventoryTemplate.vue') }
               ],
   },
   
