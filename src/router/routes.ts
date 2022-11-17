@@ -3,12 +3,13 @@ import { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
+    component: () => import('layouts/PrincipalLayout.vue'), //'layouts/MainLayout.vue'
     children: [
-                { path: '', component: () => import('pages/ToExcel.vue') },
+                { path: '', component: () => import('src/pages/ManagerInventory.vue') },
                 { path: '/items', component: () => import('pages/ItemsSetting.vue') },
-                { path: '/inventorytemplate', component: () => import('pages/InventoryTemplate.vue') },
-                { path: '/newinventorytemplate', component: () => import('pages/NewInventoryTemplate.vue') }
+                { path: '/managerinventorytemplate',name:'managerinventorytemplate', component: () => import('src/pages/ManagerInventoryTemplate.vue') },
+                { path: '/handleinventorytemplate',name:'handleinventorytemplate', component: () => import('src/pages/HandleInventoryTemplate.vue'), props: true },
+                { path: '/managerinventory',name:'managerinventory', component: () => import('src/pages/ManagerInventory.vue') },
               ],
   },
   

@@ -42,10 +42,10 @@ export default class CommonConstants {
   static _APP_LOG_PREFIX = 'app#log#';
   static _DELIVERY_PREFIX = 'delivery#';
 
-  static _ROLLBAR_API_KEY =  '9367d35d8f674393816e65653aa4e9f1';
+  static _ROLLBAR_API_KEY =  '';
 
   static _JSON_VERSION_DISPATCHER_URL =
-    'https://backendgateway.app/app/updates/kk-dispatcher/version.json';
+    '';
   static _UPLOAD_FILE_URL =
-    'https://backendgateway.app/app/logs/full/kk-dispatcher/upload.php';
+    '';
 }

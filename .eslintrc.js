@@ -100,6 +100,8 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vue/multi-word-component-names': 'off',
     'vue/no-deprecated-slot-attribute': 'off',
+    'vue/no-unused-vars':'off',
+    'vue/require-valid-default-prop': 'off',
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }

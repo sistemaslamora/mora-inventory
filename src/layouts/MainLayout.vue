@@ -1,6 +1,9 @@
 <template>
   <div class="q-pa-md">
-    <q-layout view="lHh Lpr lff">
+    <q-layout
+      style="max-height: calc( 100vh - 35px ); height: calc( 100vh - 35px )"
+      view="lHh Lpr lff"
+    >
       <q-header
         elevated
         class="bg-cyan-8"
@@ -60,7 +63,7 @@
               clickable
               v-ripple
               @click="modelHeader = 'test'"
-              to="/newinventorytemplate"
+              :to="{name:'handleinventorytemplate', params: {show: '0'}}"
             >
               <q-item-section avatar>
                 <q-icon name="send" />
@@ -75,7 +78,7 @@
               clickable
               v-ripple
               @click="modelHeader = 'Plantilla de Inventario Fisico'"
-              to="/inventorytemplate"
+              to="/managerinventorytemplate"
             >
               <q-item-section avatar>
                 <q-icon name="drafts" />
@@ -109,6 +112,7 @@
       <q-page-container>
         <router-view></router-view>
       </q-page-container>
+
     </q-layout>
   </div>
 </template>

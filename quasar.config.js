@@ -32,6 +32,8 @@ module.exports = configure(function (/* ctx */) {
     boot: [
       'i18n',
       'axios',
+      'supabase',
+      
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -117,7 +119,8 @@ module.exports = configure(function (/* ctx */) {
                   positive: '#21BA45',
                   negative: '#C10015',
                   info: '#31CCEC',
-                  warning: '#F2C037'
+                  warning: '#d0933d',
+                  mostaza: '#d0933d'
                 }
       },
 
@@ -132,7 +135,7 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ['Dialog', 'LocalStorage', 'SessionStorage'],
+      plugins: ['Dialog', 'LocalStorage', 'SessionStorage','Notify'],
     },
 
     // animations: 'all', // --- includes all animations

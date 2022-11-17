@@ -2,10 +2,14 @@
   <router-view />
 </template>
 
-<script lang="ts">
+<script >
 import { defineComponent } from 'vue';
+import { authenticateRoutes } from '@vueauth/quasar-ui-auth';
 
 export default defineComponent({
-  name: 'App'
+  name: 'App',
+  setup () {
+    authenticateRoutes()
+  }
 });
 </script>
