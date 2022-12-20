@@ -1,1 +1,0 @@
-import{C as o,c as s,h as t,H as n,i as u,bo as c}from"./index.fbcfccda.js";var l=o({name:"QTr",props:{props:Object,noHover:Boolean},setup(r,{slots:e}){const a=s(()=>"q-tr"+(r.props===void 0||r.props.header===!0?"":" "+r.props.__trClass)+(r.noHover===!0?" q-tr--no-hover":""));return()=>t("tr",{class:a.value},n(e.default))}});function v(){return u(c)}export{l as Q,v as u};
