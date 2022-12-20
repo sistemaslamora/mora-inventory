@@ -496,34 +496,6 @@ export default {
       generarTempLista,
       generarImportLista,
       loadingList,
-
-      // emulate fetching data from server
-      //   addRow () {
-      //     loading.value = true
-      //     setTimeout(() => {
-      //       const
-      //         index = Math.floor(Math.random() * (rows.value.length + 1)),
-      //         row = originalRows[ Math.floor(Math.random() * originalRows.length) ]
-
-      //       if (rows.value.length === 0) {
-      //         rowCount.value = 0
-      //       }
-
-      //       row.id = ++rowCount.value
-      //       const newRow = { ...row } // extend({}, row, { name: `${row.name} (${row.__count})` })
-      //       rows.value = [ ...rows.value.slice(0, index), newRow, ...rows.value.slice(index) ]
-      //       loading.value = false
-      //     }, 500)
-      //   },
-
-      //   removeRow () {
-      //     loading.value = true
-      //     setTimeout(() => {
-      //       const index = Math.floor(Math.random() * rows.value.length)
-      //       rows.value = [ ...rows.value.slice(0, index), ...rows.value.slice(index + 1) ]
-      //       loading.value = false
-      //     }, 500)
-      //   }
     };
   },
 };
@@ -541,6 +513,7 @@ export default {
     background-color: #811715;
     color: aliceblue;
     justify-content: flex-end;
+    flex-wrap: nowrap;
   }
   thead tr th {
     position: sticky;

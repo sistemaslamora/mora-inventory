@@ -4,7 +4,7 @@
     class="flex flex-center text-center"
   >
     <h3 class="text-weight-thin">
-      There is nothing you can't build...
+      prueba de actualizacion
     </h3>
   </q-page>
 </template>
