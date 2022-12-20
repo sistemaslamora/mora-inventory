@@ -4,7 +4,7 @@
     class="flex flex-center text-center"
   >
     <h3 class="text-weight-thin">
-      prueba de actualizacion
+      prueba de actualizacion a ver
     </h3>
   </q-page>
 </template>
