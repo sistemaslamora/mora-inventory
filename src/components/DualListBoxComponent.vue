@@ -405,7 +405,7 @@ export default {
           // a must be equal to b
           return 0;
         });
-        // console.log('rowsdb', rowsDb.value);
+        console.log('rowsdb', rowsDb.value);
         let i = rowsTemp.value.findIndex(
           (data) => data.item_id === row.item_id
         );

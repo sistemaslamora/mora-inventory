@@ -143,6 +143,14 @@
               @click="setTemplate(props)"
               icon="far fa-file-excel"
             ></q-btn>
+            <q-btn
+              dense
+              round
+              flat
+              color="grey"
+              @click="createTemplate(props)"
+              icon="far fa-file-excel"
+            ></q-btn>
           </q-td>
         </template>
       </q-table>
@@ -390,6 +398,7 @@ export default defineComponent({
         console.log(error);
       }
     };
+
     const generarTempListaEdit = async (tId, show) => {
       try {
         let tempItems = [];
@@ -1735,6 +1744,174 @@ export default defineComponent({
       );
     };
 
+    const createTemplate = async (data) => {
+      generalList.value = [];
+      let rowStyle = [];
+      const headerTime = moment().format('DD/MM/YYYY hh:mm A');
+      $q.loading.show();
+      await generarLista(2);
+      await generarTempListaEdit(data.row.id, 2);
+      const wb = XLSX.utils.book_new();
+      //   const ws = XLSX.utils.json_to_sheet([]);
+      const border = {
+        border: {
+          right: {
+            style: 'thin',
+            color: { rgb: '000000' },
+          },
+          left: {
+            style: 'thin',
+            color: { rgb: '000000' },
+          },
+          top: {
+            style: 'thin',
+            color: { rgb: '000000' },
+          },
+          bottom: {
+            style: 'thin',
+            color: { rgb: '000000' },
+          },
+        },
+      };
+      const borderNoTop = {
+        border: {
+          right: {
+            style: 'thin',
+            color: { rgb: '000000' },
+          },
+          left: {
+            style: 'thin',
+            color: { rgb: '000000' },
+          },
+
+          bottom: {
+            style: 'thin',
+            color: { rgb: '000000' },
+          },
+        },
+      };
+      // STEP 2: Create data rows
+
+      let row10 = [
+        {
+          v: 'ID',
+          t: 's',
+          s: '',
+        },
+
+        {
+          v: 'Producto/Insumo',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Tipo',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Unidad Medida',
+          t: 's',
+          s: '',
+        },
+
+        {
+          v: 'Stock contado',
+          t: 's',
+          s: '',
+        },
+      ];
+      const heading = [row10];
+
+      generalList.value.forEach((x) => {
+        heading.push([
+          {
+            v: x.id,
+            t: 's',
+            s: '',
+          },
+          {
+            v: x.codigo,
+            t: 's',
+            s: '',
+          },
+          {
+            v: x.producto,
+            t: 's',
+            s: '',
+          },
+          {
+            v: x.tipo,
+            t: 's',
+            s: '',
+          },
+          {
+            v: x.unidadMedida,
+            t: 's',
+            s: '',
+          },
+          {
+            v: x.stockContado,
+            t: 's',
+            s: '',
+          },
+        ]);
+        // if (i < generalList.value.length) {
+        //   rowStyle[0].v = generalList.value[i].id;
+        //   rowStyle[1].v = generalList.value[i].codigo;
+        //   rowStyle[2].v = generalList.value[i].producto;
+        //   rowStyle[3].v = generalList.value[i].tipo;
+        // }
+      });
+
+      //  heading.push(rowStyle);
+
+      // const merge = { s: { r: 0, c: 0 }, e: { r: 1, c: 2 } };
+      // const merge1 = { s: { r: 0, c: 3 }, e: { r: 1, c: 5 } };
+      // const merge2 = { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } };
+      // const merge3 = { s: { r: 2, c: 3 }, e: { r: 2, c: 5 } };
+      // const merge4 = { s: { r: 3, c: 0 }, e: { r: 3, c: 1 } };
+      // const merge5 = { s: { r: 4, c: 1 }, e: { r: 4, c: 2 } };
+      // const merge6 = { s: { r: 4, c: 5 }, e: { r: 4, c: 6 } };
+      // const merge7 = { s: { r: 4, c: 8 }, e: { r: 4, c: 9 } };
+      // const merge8 = { s: { r: 5, c: 1 }, e: { r: 5, c: 2 } };
+      // const merge9 = { s: { r: 5, c: 4 }, e: { r: 6, c: 4 } };
+      // const merge10 = { s: { r: 5, c: 5 }, e: { r: 6, c: 9 } };
+      // const merge11 = { s: { r: 6, c: 1 }, e: { r: 6, c: 2 } };
+      // const merge12 = { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } };
+
+      // STEP 3: Create Worksheet, add data, set cols widths
+      const ws = XLSX.utils.aoa_to_sheet(heading);
+      //   ws['!cols'] = [{ width: 20 }, { width: 20 }, { width: 40 },{ width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }];
+      //    ws['!rows'] = [{height:23}]
+      if (!ws['!merges']) ws['!merges'] = [];
+      // ws['!merges'].push(merge);
+      // ws['!merges'].push(merge1);
+      // ws['!merges'].push(merge2);
+      // ws['!merges'].push(merge3);
+      // ws['!merges'].push(merge4);
+      // ws['!merges'].push(merge5);
+      // ws['!merges'].push(merge6);
+      // ws['!merges'].push(merge7);
+      // ws['!merges'].push(merge8);
+      // ws['!merges'].push(merge9);
+      // ws['!merges'].push(merge10);
+      // ws['!merges'].push(merge11);
+      // ws['!merges'].push(merge12);
+      $q.loading.hide();
+      //    XLSX.utils.sheet_add_aoa(ws1b,{origin: 'A1'});
+      //   XLSX.utils.sheet_add_json(ws,rows,{ origin: 'A12', skipHeader: true });
+      XLSX.utils.book_append_sheet(wb, ws, 'sheet1');
+
+      // STEP 4: Write Excel file to browser
+      XLSX.writeFile(wb, 'Template.xlsx');
+
+      // eslint-disable-next-line quotes
+      console.log(
+        // eslint-disable-next-line quotes
+        `\n--------------------==~==~==~==[ ...DEMO COMPLETE ]==~==~==~==--------------------\n\n`
+      );
+    };
     return {
       columns,
       rows,
@@ -1758,6 +1935,7 @@ export default defineComponent({
       onClosePhysycalInventory,
       onSearch,
       setTemplate,
+      createTemplate,
       myLocale: {
         /* starting with Sunday */
         days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),

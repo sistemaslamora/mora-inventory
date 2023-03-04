@@ -122,6 +122,7 @@
               </div>
               <div style="width: 100%">
                 <q-table
+                  ref="tableRef"
                   class="my-sticky-header-table"
                   title="Zone"
                   dense
@@ -185,6 +186,16 @@
                         :props="props"
                       >
                         {{ props.row.item_qty }}
+                        <!-- <q-input
+                          type="number"
+                          ref="props.row.item_id"
+                          v-model.number="props.row.item_qty"
+                          dense
+                          auto-save
+                          autofocus
+                          @update:model-value="(val)=>addValueDb(val,props.row) "
+                          @keyup.enter="(set) => pressKey(props)"
+                        ></q-input> -->
                         <q-popup-edit
                           v-model.number="props.row.item_qty"
                           auto-save
@@ -196,7 +207,7 @@
                             v-model.number="scope.value"
                             dense
                             autofocus
-                            @keyup.enter="scope.set"
+                            @keyup.enter="pressKey(evt,props)"
                           ></q-input>
                         </q-popup-edit>
                       </q-td>
@@ -251,7 +262,7 @@
 </template>
 
 <script  lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue';
 import Verify from '../common/service/verify';
 import { useQuasar, uid, date } from 'quasar';
 import { useRouter } from 'vue-router';
@@ -345,6 +356,15 @@ export default {
     let message = '';
     let autoUpdate = null;
     const modelDescription = ref('');
+
+    const tableRef = ref(null);
+
+    const navigationActive = ref(false);
+    const pagination = ref({
+      rowsPerPage: 0,
+      page: 0,
+    });
+    const selectedRow = ref([]);
 
     const options = ref([
       {
@@ -540,7 +560,7 @@ export default {
             .eq('pis_piz_pi_id', tId);
           if (result.status === 200) {
             tempItems = result.data;
-            console.log('temps', mainRestList.value);
+            console.log('temps', result);
             mainRestList.value.map((x: any) => {
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
@@ -771,12 +791,14 @@ export default {
     const createItems = async (id) => {
       try {
         let data = [];
-
-        generalList.value.forEach((element) => {
+        console.log(generalList.value, 'general');
+        generalList.value.forEach((element, index) => {
+          //  if (index > 154)
           data.push({
             pis_piz_pi_id: id,
             pis_piz_id: element.idZone,
             pis_id: element.idSubZone,
+            //idType: element.idType
             item: parseInt(element.item_id),
           });
         });
@@ -1083,6 +1105,39 @@ export default {
       }
     };
 
+    const pressKey = (evt, row) => {
+      console.log(tableRef.value, 'evt');
+      console.log(row, 'row');
+
+      const { computedRowsNumber, computedRows } = tableRef.value;
+
+      if (computedRows.length === 0) {
+        return;
+      }
+
+      // const currentIndex =
+      //   selectedRow.value.length > 0
+      //     ? computedRows.indexOf(selectedRow.value[0])
+      //     : -1;
+      // const currentPage = pagination.value.page;
+      // const rowsPerPage =
+      //   pagination.value.rowsPerPage === 0
+      //     ? computedRowsNumber
+      //     : pagination.value.rowsPerPage;
+      // const lastIndex = computedRows.length - 1;
+      // const lastPage = Math.ceil(computedRowsNumber / rowsPerPage);
+
+      // let index = currentIndex;
+      // let page = currentPage;
+
+      // if (currentIndex >= lastIndex) {
+      //   page = currentPage >= lastPage ? 1 : currentPage + 1;
+      //   index = 0;
+      // } else {
+      //   index = currentIndex + 1;
+      // }
+    };
+
     return {
       prompt: ref(true),
       tipo,
@@ -1099,9 +1154,12 @@ export default {
       rowsTemp,
       filterTemp,
       playSimulate,
-      pagination: ref({
-        rowsPerPage: 0,
-      }),
+      tableRef,
+
+      navigationActive,
+      filter: ref(''),
+      selectedRow,
+      pagination,
       onCancel,
       onCreate,
       updateSelected,
@@ -1109,6 +1167,90 @@ export default {
       simulate,
       closeSimulate,
       verify,
+      pressKey,
+      tableClass: computed(() =>
+        navigationActive.value === true ? 'shadow-8 no-outline' : null
+      ),
+
+      activateNavigation() {
+        navigationActive.value = true;
+      },
+
+      deactivateNavigation() {
+        navigationActive.value = false;
+      },
+
+      onKey(evt) {
+        if (
+          navigationActive.value !== true ||
+          [33, 34, 35, 36, 38, 40].indexOf(evt.keyCode) === -1 ||
+          tableRef.value === null
+        ) {
+          return;
+        }
+
+        evt.preventDefault();
+
+        const { computedRowsNumber, computedRows } = tableRef.value;
+
+        if (computedRows.length === 0) {
+          return;
+        }
+
+        const currentIndex =
+          selectedRow.value.length > 0
+            ? computedRows.indexOf(selectedRow.value[0])
+            : -1;
+        const currentPage = pagination.value.page;
+        const rowsPerPage =
+          pagination.value.rowsPerPage === 0
+            ? computedRowsNumber
+            : pagination.value.rowsPerPage;
+        const lastIndex = computedRows.length - 1;
+        const lastPage = Math.ceil(computedRowsNumber / rowsPerPage);
+
+        let index = currentIndex;
+        let page = currentPage;
+
+        switch (evt.keyCode) {
+          case 36: // Home
+            page = 1;
+            index = 0;
+            break;
+          case 35: // End
+            page = lastPage;
+            index = rowsPerPage - 1;
+            break;
+          case 33: // PageUp
+            page = currentPage <= 1 ? lastPage : currentPage - 1;
+            if (index < 0) {
+              index = 0;
+            }
+            break;
+          case 34: // PageDown
+            page = currentPage >= lastPage ? 1 : currentPage + 1;
+            if (index < 0) {
+              index = rowsPerPage - 1;
+            }
+            break;
+          case 38: // ArrowUp
+            if (currentIndex <= 0) {
+              page = currentPage <= 1 ? lastPage : currentPage - 1;
+              index = rowsPerPage - 1;
+            } else {
+              index = currentIndex - 1;
+            }
+            break;
+          case 40: // ArrowDown
+            if (currentIndex >= lastIndex) {
+              page = currentPage >= lastPage ? 1 : currentPage + 1;
+              index = 0;
+            } else {
+              index = currentIndex + 1;
+            }
+            break;
+        }
+      },
     };
   },
 };
