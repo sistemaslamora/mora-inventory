@@ -18,10 +18,7 @@
         @row-dblclick="passData"
       >
         <template v-slot:loading>
-          <q-inner-loading
-            showing
-            color="primary"
-          />
+          <q-inner-loading showing color="primary" />
         </template>
         <template v-slot:header="props">
           <q-tr :props="props">
@@ -39,7 +36,7 @@
           <!-- <q-btn color="primary" :disable="loading" label="Add row" @click="addRow" />
                     <q-btn class="q-ml-sm" color="primary" :disable="loading" label="Remove row" @click="removeRow" />-->
 
-          <div style="margin-right: 1rem; width:130px">
+          <div style="margin-right: 1rem; width: 130px">
             <q-select
               dark
               dense
@@ -49,21 +46,12 @@
               @update:model-value="filterType()"
               :display-value="`${tipo ? tipo.label : 'Insumo'}`"
             >
-
             </q-select>
           </div>
           <div>
-            <q-input
-              dark
-              dense
-              standout
-              v-model="filter"
-            >
+            <q-input dark dense standout v-model="filter">
               <template v-slot:append>
-                <q-icon
-                  v-if="filterTemp === ''"
-                  name="search"
-                />
+                <q-icon v-if="filterTemp === ''" name="search" />
                 <q-icon
                   v-else
                   name="clear"
@@ -73,9 +61,7 @@
               </template>
             </q-input>
           </div>
-
         </template>
-
       </q-table>
     </div>
     <!-- <div
@@ -117,28 +103,16 @@
         @row-dblclick="restoreData"
       >
         <template v-slot:loading>
-          <q-inner-loading
-            showing
-            color="primary"
-          />
+          <q-inner-loading showing color="primary" />
         </template>
         <template v-slot:top>
           <!-- <q-btn color="primary" :disable="loading" label="Add row" @click="addRow" />
                     <q-btn class="q-ml-sm" color="primary" :disable="loading" label="Remove row" @click="removeRow" />-->
           <div class="row justify-start">
             <div>
-              <q-input
-                dark
-                dense
-                standout
-                v-model="filterTemp"
-                class="q-ml-sm"
-              >
+              <q-input dark dense standout v-model="filterTemp" class="q-ml-sm">
                 <template v-slot:append>
-                  <q-icon
-                    v-if="filterTemp === ''"
-                    name="search"
-                  />
+                  <q-icon v-if="filterTemp === ''" name="search" />
                   <q-icon
                     v-else
                     name="clear"
@@ -150,7 +124,6 @@
             </div>
           </div>
         </template>
-
       </q-table>
     </div>
   </div>
@@ -405,7 +378,7 @@ export default {
           // a must be equal to b
           return 0;
         });
-        console.log('rowsdb', rowsDb.value);
+        // console.log('rowsdb', rowsDb.value);
         let i = rowsTemp.value.findIndex(
           (data) => data.item_id === row.item_id
         );
@@ -429,7 +402,7 @@ export default {
           const allData = { ...props.selected, ...rowData };
           rowsTemp.value.push(allData);
           generalList.value.push(allData);
-          console.log('general', generalList.value);
+          // console.log('general', generalList.value);
           rowsTemp.value.sort(function (a, b) {
             if (a.item_descripcion > b.item_descripcion) {
               return 1;

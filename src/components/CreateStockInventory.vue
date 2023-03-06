@@ -1,11 +1,6 @@
 2<template>
   <div class="q-pa-md q-gutter-sm">
-
-    <q-dialog
-      v-if="show"
-      v-model="prompt"
-      persistent
-    >
+    <q-dialog v-if="show" v-model="prompt" persistent>
       <q-card style="min-width: 350px">
         <q-card-section>
           <div class="text-h6">Nuevo Inventario</div>
@@ -17,7 +12,6 @@
         >
           <q-card-section class="q-pt-none">
             <div class="_filters--web">
-
               <div class="child">
                 <q-input
                   ref="descriptionRef"
@@ -46,13 +40,12 @@
                   lazy-rules
                   :rules="storeRules"
                 >
-
                 </q-select>
               </div>
               <div class="child">
                 <fieldset>
                   <legend>Plantillas</legend>
-                  <q-scroll-area style="height: 200px; max-width: 300px;">
+                  <q-scroll-area style="height: 200px; max-width: 300px">
                     <q-field
                       filled
                       :model-value="template"
@@ -76,25 +69,12 @@
                   </q-scroll-area>
                 </fieldset>
               </div>
-
             </div>
           </q-card-section>
 
-          <q-card-actions
-            align="right"
-            class="text-primary"
-          >
-            <q-btn
-              flat
-              label="Cancel"
-              type="reset"
-              v-close-popup
-            />
-            <q-btn
-              flat
-              label="Create"
-              type="submit"
-            />
+          <q-card-actions align="right" class="text-primary">
+            <q-btn flat label="Cancel" type="reset" v-close-popup />
+            <q-btn flat label="Create" type="submit" />
           </q-card-actions>
         </form>
       </q-card>
@@ -191,18 +171,20 @@ export default {
 
     const onCreate = () => {
       try {
-        // console.log('rule', v$);
+        // console.log(moment().format('YYYY-MM-DD'));
         const data = {
           store: store.value.label,
           storeId: store.value.value,
           template: template.value,
           description: modelDescription.value,
+          create: moment().format('YYYY-MM-DD'),
         };
         context.emit('onAccept', data);
       } catch (error) {
         console.log(error);
       }
     };
+
     return {
       prompt: ref(true),
       store,
@@ -234,7 +216,7 @@ export default {
         descriptionRef.value.validate();
         storeRef.value.validate();
         templateRef.value.validate();
-        console.log(templateRef, 'templateref');
+        // console.log(templateRef, 'templateref');
         if (
           templateRef.value.hasError ||
           descriptionRef.value.hasError ||

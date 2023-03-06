@@ -1,13 +1,6 @@
 <template>
-  <q-layout
-    view="hHh lpR fFf"
-    class="bg-grey-1"
-  >
-    <q-header
-      elevated
-      class="bg-white text-grey-8"
-      height-hint="64"
-    >
+  <q-layout view="hHh lpR fFf" class="bg-grey-1">
+    <q-header elevated class="bg-white text-grey-8" height-hint="64">
       <q-toolbar class="__toolbar">
         <q-btn
           flat
@@ -20,11 +13,11 @@
         />
 
         <q-toolbar-title
-          v-if=" $q.screen.width > 400"
+          v-if="$q.screen.width > 400"
           shrink
           class="row items-center no-wrap"
         >
-          <img src="../assets/logo.png">
+          <img src="../assets/logo.png" />
 
           <span class="q-ml-sm">{{ userEmail }}</span>
         </q-toolbar-title>
@@ -44,28 +37,13 @@
           >
             <q-tooltip>Google Apps</q-tooltip>
           </q-btn> -->
-          <q-btn
-            round
-            dense
-            flat
-            color="grey-8"
-            icon="notifications"
-          >
-            <q-badge
-              color="red"
-              text-color="white"
-              floating
-            >
-              2
-            </q-badge>
+          <q-btn round dense flat color="grey-8" icon="notifications">
+            <q-badge color="red" text-color="white" floating> 2 </q-badge>
             <q-tooltip>Notificaciones</q-tooltip>
           </q-btn>
-          <q-btn
-            round
-            flat
-          >
+          <q-btn round flat>
             <q-avatar size="26px">
-              <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+              <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
             </q-avatar>
             <q-tooltip>Usuario</q-tooltip>
             <AuthAccountMenu />
@@ -89,10 +67,7 @@
       :width="240"
     >
       <q-scroll-area class="fit">
-        <q-list
-          padding
-          class="text-grey-8"
-        >
+        <q-list padding class="text-grey-8">
           <q-item
             class="__drawer-item"
             v-ripple
@@ -183,55 +158,65 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { fasEarthAmericas, fasFlask } from '@quasar/extras/fontawesome-v6'
-import AuthAccountMenu from '../auth/components/AccountMenu/AccountMenu.vue'
-import { getDefaultProvider, useIdentityPasswordLogin, useAuthState } from '@vueauth/core'
+import { ref } from 'vue';
+import { fasEarthAmericas, fasFlask } from '@quasar/extras/fontawesome-v6';
+import AuthAccountMenu from '../auth/components/AccountMenu/AccountMenu.vue';
+import {
+  getDefaultProvider,
+  useIdentityPasswordLogin,
+  useAuthState,
+} from '@vueauth/core';
 
-const { user } = useAuthState()
-const { identity } = useIdentityPasswordLogin()
+const { user } = useAuthState();
+const { identity } = useIdentityPasswordLogin();
 
-console.log('user', user)
-console.log('identity', identity)
-const leftDrawerOpen = ref(false)
-const search = ref('')
-const showAdvanced = ref(false)
-const showDateOptions = ref(false)
-const exactPhrase = ref('')
-const hasWords = ref('')
-const excludeWords = ref('')
-const byWebsite = ref('')
-const byDate = ref('Any time')
+//console.log('user', user)
+//console.log('identity', identity)
+const leftDrawerOpen = ref(false);
+const search = ref('');
+const showAdvanced = ref(false);
+const showDateOptions = ref(false);
+const exactPhrase = ref('');
+const hasWords = ref('');
+const excludeWords = ref('');
+const byWebsite = ref('');
+const byDate = ref('Any time');
 
-function onClear () {
-  exactPhrase.value = ''
-  hasWords.value = ''
-  excludeWords.value = ''
-  byWebsite.value = ''
-  byDate.value = 'Any time'
+function onClear() {
+  exactPhrase.value = '';
+  hasWords.value = '';
+  excludeWords.value = '';
+  byWebsite.value = '';
+  byDate.value = 'Any time';
 }
-function changeDate (option) {
-  byDate.value = option
-  showDateOptions.value = false
+function changeDate(option) {
+  byDate.value = option;
+  showDateOptions.value = false;
 }
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value
+function toggleLeftDrawer() {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
-const authProvider = getDefaultProvider()
+const authProvider = getDefaultProvider();
 
-const authProviderUpperFirst = authProvider.charAt(0).toUpperCase() + authProvider.slice(1)
-const userEmail = ref(user.value.email)
+const authProviderUpperFirst =
+  authProvider.charAt(0).toUpperCase() + authProvider.slice(1);
+const userEmail = ref(user.value.email);
 
 const links1 = ref([
   { icon: 'web', text: 'Escritorio', route: '/dashboard' },
-  { icon: 'memory', text: 'Plantilla de Inventario', route: '/managerinventorytemplate' },
-  { icon: 'star_border', text: 'Inventario Físico', route: '/managerinventory' },
+  {
+    icon: 'memory',
+    text: 'Plantilla de Inventario',
+    route: '/managerinventorytemplate',
+  },
+  {
+    icon: 'star_border',
+    text: 'Inventario Físico',
+    route: '/managerinventory',
+  },
   // { icon: 'settings', text: 'Generar Inventario', route: '/managerinventory' }
-])
-
-
-
+]);
 </script>
 
 <style >

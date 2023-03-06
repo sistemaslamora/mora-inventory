@@ -1,6 +1,5 @@
 <template>
   <div class="q-pa-md q-gutter-sm">
-
     <q-dialog
       v-if="show"
       v-model="prompt"
@@ -9,17 +8,9 @@
       transition-show="slide-up"
       transition-hide="slide-down"
     >
-
       <div>
-        <q-layout
-          view="hHh Lpr lff"
-          container
-          class="shadow-2 rounded-borders"
-        >
-          <q-header
-            elevated
-            class="bg-primary"
-          >
+        <q-layout view="hHh Lpr lff" container class="shadow-2 rounded-borders">
+          <q-header elevated class="bg-primary">
             <q-toolbar>
               <q-btn
                 flat
@@ -78,10 +69,7 @@
           </q-drawer>
 
           <q-page-container>
-            <q-page
-              class="bg-white"
-              padding
-            >
+            <q-page class="bg-white" padding>
               <div class="flex justify-between">
                 <div>
                   <q-breadcrumbs
@@ -96,15 +84,14 @@
                       :label="breadcumData.SubZone"
                       icon="fa-solid fa-location-dot"
                     />
-
                   </q-breadcrumbs>
                 </div>
                 <div>
                   <q-btn
                     size="xs"
                     push
-                    :color="playSimulate?'primary' : 'white'"
-                    :text-color="playSimulate?'white' : 'primary'"
+                    :color="playSimulate ? 'primary' : 'white'"
+                    :text-color="playSimulate ? 'white' : 'primary'"
                     icon="fas fa-play"
                     class="q-mr-xs q-pr-md"
                     @click="simulate"
@@ -112,8 +99,8 @@
                   <q-btn
                     size="xs"
                     push
-                    :color="playSimulate?'white' : 'primary'"
-                    :text-color="playSimulate?'primary' : 'white'"
+                    :color="playSimulate ? 'white' : 'primary'"
+                    :text-color="playSimulate ? 'primary' : 'white'"
                     icon="fas fa-pause"
                     class="q-mr-xs q-pr-md"
                     @click="closeSimulate"
@@ -121,142 +108,33 @@
                 </div>
               </div>
               <div style="width: 100%">
-                <q-table
-                  ref="tableRef"
-                  class="my-sticky-header-table"
-                  title="Zone"
-                  dense
-                  :rows="rowsTemp"
-                  :columns="columnsTemp"
-                  separator="cell"
-                  row-key="name"
-                  :filter="filterTemp"
-                  virtual-scroll
-                  v-model:pagination="pagination"
-                  :rows-per-page-options="[0]"
-                  no-data-label="No hay información"
+                <hot-table
+                  ref="tableInstance"
+                  :settings="hotSettings"
+                  :data="data"
                 >
-
-                  <template v-slot:top>
-                    <!-- <q-btn color="primary" :disable="loading" label="Add row" @click="addRow" />
-                    <q-btn class="q-ml-sm" color="primary" :disable="loading" label="Remove row" @click="removeRow" />-->
-
-                    <div class="row justify-end">
-                      <div>
-                        <q-input
-                          dark
-                          dense
-                          standout
-                          v-model="filterTemp"
-                          style="width: 360px"
-                          class="q-ml-sm "
-                        >
-                          <template v-slot:append>
-                            <q-icon
-                              v-if="filterTemp === ''"
-                              name="search"
-                            />
-                            <q-icon
-                              v-else
-                              name="clear"
-                              class="cursor-pointer"
-                              @click="filterTemp = ''"
-                            />
-                          </template>
-                        </q-input>
-                      </div>
-                    </div>
-                  </template>
-                  <template v-slot:body="props">
-                    <q-tr :props="props">
-                      <q-td
-                        key="description"
-                        :props="props"
-                      >
-                        {{ props.row.item_descripcion }}
-                      </q-td>
-                      <q-td
-                        key="unidad"
-                        :props="props"
-                      >
-                        {{ props.row.item_unidad }}
-                      </q-td>
-                      <q-td
-                        key="qty"
-                        :props="props"
-                      >
-                        {{ props.row.item_qty }}
-                        <!-- <q-input
-                          type="number"
-                          ref="props.row.item_id"
-                          v-model.number="props.row.item_qty"
-                          dense
-                          auto-save
-                          autofocus
-                          @update:model-value="(val)=>addValueDb(val,props.row) "
-                          @keyup.enter="(set) => pressKey(props)"
-                        ></q-input> -->
-                        <q-popup-edit
-                          v-model.number="props.row.item_qty"
-                          auto-save
-                          @update:model-value="(val)=>addValueDb(val,props.row) "
-                          v-slot="scope"
-                        >
-                          <q-input
-                            type="number"
-                            v-model.number="scope.value"
-                            dense
-                            autofocus
-                            @keyup.enter="pressKey(evt,props)"
-                          ></q-input>
-                        </q-popup-edit>
-                      </q-td>
-                      <!-- 
-                      <q-td
-                        key="fat"
-                        :props="props"
-                      >
-                        {{ props.row.fat }}
-                        <q-popup-edit
-                          disable
-                          v-model="props.row.fat"
-                          auto-save
-                          v-slot="scope"
-                        >
-                          <div class="text-italic text-primary q-mb-xs">
-                            My Custom Title
-                          </div>
-
-                          <q-input
-                            type="number"
-                            v-model.number="scope.value"
-                            dense
-                            autofocus
-                            @keyup.enter="scope.set"
-                          ></q-input>
-                        </q-popup-edit>
-                      </q-td> -->
-                    </q-tr>
-                  </template>
-                </q-table>
+                  <hot-column
+                    title="Item"
+                    read-only="true"
+                    data="item_descripcion"
+                  >
+                  </hot-column>
+                  <hot-column
+                    title="Unidad"
+                    read-only="true"
+                    data="item_unidad"
+                  >
+                  </hot-column>
+                  <hot-column title="Cantidad" data="item_qty"> </hot-column>
+                </hot-table>
               </div>
             </q-page>
           </q-page-container>
         </q-layout>
       </div>
 
-      <q-btn
-        flat
-        label="Cancel"
-        @click="onCancel"
-        v-close-popup
-      />
-      <q-btn
-        flat
-        label="Createee"
-        @click="onCreate"
-        v-close-popup
-      />
+      <q-btn flat label="Cancel" @click="onCancel" v-close-popup />
+      <q-btn flat label="Createee" @click="onCreate" v-close-popup />
     </q-dialog>
   </div>
 </template>
@@ -270,7 +148,12 @@ import moment from 'moment';
 import 'moment/locale/es';
 import rules from 'quasar-app-extension-vuelidate-rules';
 import useSupabase from '../boot/supabase';
+import { HotTable, HotColumn } from '@handsontable/vue3';
+import { registerAllModules } from 'handsontable/registry';
+import 'handsontable/dist/handsontable.full.css';
+import { useAuthState } from '@vueauth/core';
 
+registerAllModules();
 const columnsTemp = [
   {
     name: 'description',
@@ -331,7 +214,13 @@ export default {
       required: false,
     },
   },
+  components: {
+    HotTable,
+    HotColumn,
+  },
   setup(props, context: any) {
+    const { user } = useAuthState();
+    const userEmail = ref(user.value.email);
     const $q = useQuasar();
     const tipo = ref(null);
     const router = useRouter();
@@ -349,12 +238,14 @@ export default {
     const response = ref(false);
     const generalList = ref([]);
     const rowsTemp = ref([]);
+    const data = ref([]);
     const filterTemp = ref('');
     const jsonStorage = ref([]);
     const playSimulate = ref(false);
     const idTemplate = ref('');
     let message = '';
     let autoUpdate = null;
+    const tableInstance = ref(null);
     const modelDescription = ref('');
 
     const tableRef = ref(null);
@@ -441,6 +332,7 @@ export default {
         rowsTemp.value = generalList.value.filter(
           (x) => x.idSubZone === treeData.value.idSubZone
         );
+        swapHotData();
       }
     );
 
@@ -504,7 +396,7 @@ export default {
 
     const CompareList = async () => {
       try {
-        console.log('storeid', props.storeId);
+        // console.log('storeid', props.storeId);
         const params = {
           store: parseInt(props.storeId),
           dateInv: moment().format('YYYY-MM-DD' + '%20' + 'HH:mm:00'),
@@ -534,18 +426,30 @@ export default {
       }
     };
 
-    const addValueDb = async (row, value) => {
+    const addValueDb = async (change, source) => {
       try {
-        const { data, error } = await supabase
-          .from('bizphysicalinventoryitems')
-          .update({ qty: value.item_qty })
-          .eq('item', value.item_id)
-          .eq('pis_piz_pi_id', value.idTemplate)
-          .eq('pis_piz_id', value.idZone)
-          .eq('pis_id', value.idSubZone);
+        if (source === 'edit') {
+          const body = change[0][0];
+
+          const value = rowsTemp.value[body];
+          const { data, error } = await supabase
+            .from('bizphysicalinventoryitems')
+            .update({ qty: value.item_qty })
+            .eq('item', value.item_id)
+            .eq('pis_piz_pi_id', value.idTemplate)
+            .eq('pis_piz_id', value.idZone)
+            .eq('pis_id', value.idSubZone);
+          // console.log(value, 'value');
+        }
       } catch (error) {
         console.log(error);
       }
+    };
+
+    const swapHotData = () => {
+      // The Handsontable instance is stored under the `hotInstance` property of the wrapper component.
+      // console.log(tableInstance.value);
+      tableInstance.value.hotInstance.updateData(rowsTemp.value);
     };
 
     const generarTempListaEdit = async (tId, show) => {
@@ -560,7 +464,7 @@ export default {
             .eq('pis_piz_pi_id', tId);
           if (result.status === 200) {
             tempItems = result.data;
-            console.log('temps', result);
+            //       console.log('temps', result);
             mainRestList.value.map((x: any) => {
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
@@ -594,7 +498,8 @@ export default {
             rowsTemp.value = generalList.value.filter(
               (x) => x.idSubZone === treeData.value.idSubZone
             );
-
+            //  console.log(rowsTemp.value, 'rowstemp');
+            swapHotData();
             // context.emit('onUpdate', generalList.value);
           } else {
             console.log(
@@ -729,6 +634,8 @@ export default {
           comment: '',
           created_at: formattedString,
           update_at: formattedString,
+          created_by: userEmail.value,
+          create: moment().format('YYYY-MM-DD'),
         };
         const { error } = await supabase
           .from('bizphysicalinventory')
@@ -791,7 +698,7 @@ export default {
     const createItems = async (id) => {
       try {
         let data = [];
-        console.log(generalList.value, 'general');
+        //console.log(generalList.value, 'general');
         generalList.value.forEach((element, index) => {
           //  if (index > 154)
           data.push({
@@ -1037,7 +944,7 @@ export default {
             rowsTemp.value = generalList.value.filter(
               (x) => x.idSubZone === treeData.value.idSubZone
             );
-
+            swapHotData();
             // context.emit('onUpdate', generalList.value);
           } else {
             console.log(
@@ -1055,6 +962,7 @@ export default {
     onMounted(async () => {
       try {
         // dualList.value.loadingList(true, props.show);
+
         idTemplate.value = props.templateId;
         modelDescription.value = props.description;
         jsonStorage.value = $q.localStorage.getItem('mainList');
@@ -1105,39 +1013,6 @@ export default {
       }
     };
 
-    const pressKey = (evt, row) => {
-      console.log(tableRef.value, 'evt');
-      console.log(row, 'row');
-
-      const { computedRowsNumber, computedRows } = tableRef.value;
-
-      if (computedRows.length === 0) {
-        return;
-      }
-
-      // const currentIndex =
-      //   selectedRow.value.length > 0
-      //     ? computedRows.indexOf(selectedRow.value[0])
-      //     : -1;
-      // const currentPage = pagination.value.page;
-      // const rowsPerPage =
-      //   pagination.value.rowsPerPage === 0
-      //     ? computedRowsNumber
-      //     : pagination.value.rowsPerPage;
-      // const lastIndex = computedRows.length - 1;
-      // const lastPage = Math.ceil(computedRowsNumber / rowsPerPage);
-
-      // let index = currentIndex;
-      // let page = currentPage;
-
-      // if (currentIndex >= lastIndex) {
-      //   page = currentPage >= lastPage ? 1 : currentPage + 1;
-      //   index = 0;
-      // } else {
-      //   index = currentIndex + 1;
-      // }
-    };
-
     return {
       prompt: ref(true),
       tipo,
@@ -1155,7 +1030,8 @@ export default {
       filterTemp,
       playSimulate,
       tableRef,
-
+      data,
+      tableInstance,
       navigationActive,
       filter: ref(''),
       selectedRow,
@@ -1167,96 +1043,31 @@ export default {
       simulate,
       closeSimulate,
       verify,
-      pressKey,
-      tableClass: computed(() =>
-        navigationActive.value === true ? 'shadow-8 no-outline' : null
-      ),
 
-      activateNavigation() {
-        navigationActive.value = true;
+      hotSettings: {
+        height: 'auto',
+
+        stretchH: 'all',
+        licenseKey: 'non-commercial-and-evaluation',
+        afterChange: function (change, source) {
+          addValueDb(change, source);
+        },
       },
-
-      deactivateNavigation() {
-        navigationActive.value = false;
-      },
-
-      onKey(evt) {
-        if (
-          navigationActive.value !== true ||
-          [33, 34, 35, 36, 38, 40].indexOf(evt.keyCode) === -1 ||
-          tableRef.value === null
-        ) {
-          return;
-        }
-
-        evt.preventDefault();
-
-        const { computedRowsNumber, computedRows } = tableRef.value;
-
-        if (computedRows.length === 0) {
-          return;
-        }
-
-        const currentIndex =
-          selectedRow.value.length > 0
-            ? computedRows.indexOf(selectedRow.value[0])
-            : -1;
-        const currentPage = pagination.value.page;
-        const rowsPerPage =
-          pagination.value.rowsPerPage === 0
-            ? computedRowsNumber
-            : pagination.value.rowsPerPage;
-        const lastIndex = computedRows.length - 1;
-        const lastPage = Math.ceil(computedRowsNumber / rowsPerPage);
-
-        let index = currentIndex;
-        let page = currentPage;
-
-        switch (evt.keyCode) {
-          case 36: // Home
-            page = 1;
-            index = 0;
-            break;
-          case 35: // End
-            page = lastPage;
-            index = rowsPerPage - 1;
-            break;
-          case 33: // PageUp
-            page = currentPage <= 1 ? lastPage : currentPage - 1;
-            if (index < 0) {
-              index = 0;
-            }
-            break;
-          case 34: // PageDown
-            page = currentPage >= lastPage ? 1 : currentPage + 1;
-            if (index < 0) {
-              index = rowsPerPage - 1;
-            }
-            break;
-          case 38: // ArrowUp
-            if (currentIndex <= 0) {
-              page = currentPage <= 1 ? lastPage : currentPage - 1;
-              index = rowsPerPage - 1;
-            } else {
-              index = currentIndex - 1;
-            }
-            break;
-          case 40: // ArrowDown
-            if (currentIndex >= lastIndex) {
-              page = currentPage >= lastPage ? 1 : currentPage + 1;
-              index = 0;
-            } else {
-              index = currentIndex + 1;
-            }
-            break;
-        }
+      // id: 'my-custom-id',
+      // className: 'my-custom-classname',
+      // style: 'overflow: hidden;',
+      secondColumnSettings: {
+        title: 'Second column header',
       },
     };
   },
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
+::v-deep .handsontable .wtHider {
+  width: auto !important;
+}
 ._filters--web {
   display: flex;
   flex-direction: column;

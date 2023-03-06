@@ -1,9 +1,6 @@
 <template>
   <div class="q-pa-md q-gutter-y-sm">
-    <q-toolbar
-      class="bg-primary q-py-sm text-white"
-      style="padding-top: 1rem;"
-    >
+    <q-toolbar class="bg-primary q-py-sm text-white" style="padding-top: 1rem">
       <q-btn
         stack
         flat
@@ -13,7 +10,7 @@
         label="Nuevo"
         @click="showStock = true"
         icon="fa-solid fa-file-circle-plus"
-        style="line-height: 1.5rem;"
+        style="line-height: 1.5rem"
       >
       </q-btn>
 
@@ -29,12 +26,10 @@
       >
       </q-btn> -->
 
-      <q-separator
-        vertical
-        inset
-        color="warning"
-      />
-      <div :class="$q.screen.width > 600 ? '_filters--web':'_filters--mobile'">
+      <q-separator vertical inset color="warning" />
+      <div
+        :class="$q.screen.width > 600 ? '_filters--web' : '_filters--mobile'"
+      >
         <div class="child">
           <q-input
             dark
@@ -45,10 +40,7 @@
             :rules="['date']"
           >
             <template v-slot:append>
-              <q-icon
-                name="event"
-                class="cursor-pointer"
-              >
+              <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
                   cover
                   transition-show="scale"
@@ -85,10 +77,8 @@
             :options="options"
             :display-value="`${tipo ? tipo.label : ''}`"
           >
-
           </q-select>
         </div>
-
       </div>
       <q-btn
         stack
@@ -99,7 +89,7 @@
         @click="onSearch"
         align="center"
         icon="fas fa-search"
-        style="line-height: 1.5rem;"
+        style="line-height: 1.5rem"
       >
       </q-btn>
     </q-toolbar>
@@ -112,14 +102,15 @@
         :visible-columns="visibleColumns"
         row-key="Descripcion"
         dense
-      > <template v-slot:header="props">
+      >
+        <template v-slot:header="props">
           <q-tr :props="props">
             <q-th
               v-for="col in props.cols"
               :key="col.name"
               :props="props"
               class="text-italic"
-              style="color: #d4aa70; font-size: 1rem;"
+              style="color: #d4aa70; font-size: 1rem"
             >
               {{ col.label }}
             </q-th>
@@ -245,6 +236,7 @@ export default defineComponent({
         dbVal: 7,
       },
     ]);
+
     const schema = {
       IdRest: {
         // JSON object property name.
@@ -288,10 +280,19 @@ export default defineComponent({
         sortable: true,
       },
       {
+        name: 'Description',
+        required: true,
+        label: 'Descripcion',
+        align: 'left',
+        field: (row) => row.description,
+        format: (val) => `${val}`,
+        sortable: true,
+      },
+      {
         name: 'CreateBy',
         align: 'center',
         label: 'Usuario',
-        field: (row) => row.create_by,
+        field: (row) => row.created_by,
         format: (val) => `${val}`,
         sortable: true,
         //    required: showScreen.value,
@@ -300,7 +301,7 @@ export default defineComponent({
         name: 'CreateAt',
         align: 'center',
         label: 'Fecha',
-        field: (row) => moment(row.created_at).format('YYYY-MM-DD'),
+        field: (row) => row.create,
         format: (val) => `${val}`,
         sortable: true,
         //     required: showScreen.value,
@@ -409,7 +410,7 @@ export default defineComponent({
             .eq('pis_piz_pi_id', tId);
           if (result.status === 200) {
             tempItems = result.data;
-            console.log('temps', mainRestList.value);
+            // console.log('temps', mainRestList.value);
             mainRestList.value.map((x: any) => {
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
@@ -442,16 +443,8 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      dateInventory.value = moment().format('YYYY-MM-DD HH:mm::ssZ');
-      // try {
-      //   let physical = await supabase
-      //   .from('bizphysicalinventory')
-      //   .select('*')
-      //   // Filters
-      //   .eq('column', 'Equal to')
-      // } catch (error) {
-      //   console.log(error)
-      // }
+      dateInventory.value = moment().format('YYYY-MM-DD');
+      onSearch();
     });
 
     watchEffect(() => {
@@ -469,31 +462,29 @@ export default defineComponent({
       try {
         rows.value = [];
         let _date = moment(dateInventory.value).format('YYYY-MM-DD');
-        // const timeStamp = Date.now();
-        // const formattedString = date.formatDate(
-        //   timeStamp,
-        //   'YYYY-MM-DDTHH:mm:ss.SSSZ'
-        // );
-        // console.log('date', formattedString);
-        // console.log(_date);
         let { data: response, error } = await supabase
           .from('bizphysicalinventory')
-          .select('created_at');
-        // Filters
-        // .eq('dateconvert', _date);
-        console.log(response);
-        const physical = await supabase.rpc('get_inventory_by_date', {
-          fecha: _date,
-        });
-        if (physical.status === 200) {
-          physical.data.forEach((x) => {
+          .select('*')
+          // Filters
+          .eq('create', _date);
+        // console.log(response, 'responseCreate');
+        if (response) {
+          response.forEach((x) => {
             rows.value.push(x);
           });
-        } else {
-          console.log(
-            physical.error ? physical.error : 'result' + physical.statusText
-          );
         }
+        // const physical = await supabase.rpc('get_inventory_by_date', {
+        //   fecha: _date,
+        // });
+        // if (physical.status === 200) {
+        //   physical.data.forEach((x) => {
+        //     rows.value.push(x);
+        //   });
+        // } else {
+        //   console.log(
+        //     physical.error ? physical.error : 'result' + physical.statusText
+        //   );
+        // }
       } catch (error) {
         console.log(error);
       }
@@ -501,7 +492,7 @@ export default defineComponent({
 
     const editRow = (data) => {
       try {
-        console.log('data', data);
+        //console.log('data', data);
         idTemplate.value = data.row.id;
         storeName.value = data.row.store;
         storeId.value = data.row.store_id;
@@ -516,7 +507,7 @@ export default defineComponent({
 
     const onCreateInventory = (data) => {
       try {
-        console.log('data', data);
+        // console.log('data', data);
         idTemplate.value = data.template;
         storeName.value = data.store;
         storeId.value = data.storeId;
@@ -585,7 +576,7 @@ export default defineComponent({
           }
         });
 
-        console.log('la diff', valor.value);
+        //console.log('la diff', valor.value);
       }
     };
 

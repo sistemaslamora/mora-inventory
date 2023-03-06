@@ -1,47 +1,36 @@
 <template>
   <!-- notice dialogRef here -->
-  <q-dialog
-    ref="dialogRef"
-    @hide="onDialogHide"
-  >
+  <q-dialog ref="dialogRef" @hide="onDialogHide">
     <q-card class="q-dialog-plugin card-principal">
       <div class="my-card q-ma-sm">
         <q-card class="zone">
           <q-card-section class="bg-primary text-white">
             <div class="text-h6">ZONAS</div>
-
           </q-card-section>
 
           <q-card-actions align="around">
             <q-btn
               icon="fa-regular fa-square-plus"
               flat
-              style="line-height: 1.5rem;"
+              style="line-height: 1.5rem"
               @click="prompt"
-            > Añadir</q-btn>
+            >
+              Añadir</q-btn
+            >
             <q-btn
               icon="fa-regular fa-square-minus"
               flat
               @click="deleteZone"
-              style="line-height: 1.5rem;"
-            >Eliminar</q-btn>
+              style="line-height: 1.5rem"
+              >Eliminar</q-btn
+            >
           </q-card-actions>
           <q-separator />
           <q-card-section>
             <q-scroll-area style="height: 200px">
-              <div
-                v-if="modelZones"
-                class="q-pa-sm"
-              >
-
-                <q-list
-                  bordered
-                  separator
-                >
-                  <template
-                    v-for="zone in modelZones"
-                    :key="zone"
-                  >
+              <div v-if="modelZones" class="q-pa-sm">
+                <q-list bordered separator>
+                  <template v-for="zone in modelZones" :key="zone">
                     <q-item
                       clickable
                       v-ripple
@@ -55,25 +44,21 @@
                           name="fa-solid fa-map-location-dot"
                         />
                       </q-item-section>
-                      <q-item-section>{{zone.name}}</q-item-section>
+                      <q-item-section>{{ zone.name }}</q-item-section>
                       <q-item-section avatar>
-
                         <q-icon
                           color="cyan-5"
                           size="18px"
                           name="fa-regular fa-pen-to-square"
                           @click="editZone(zone)"
                         />
-
                       </q-item-section>
                     </q-item>
                   </template>
                 </q-list>
-
               </div>
             </q-scroll-area>
           </q-card-section>
-
         </q-card>
 
         <q-separator vertical />
@@ -82,7 +67,9 @@
           <q-card-section class="bg-primary text-white">
             <div class="row justify-between">
               <div class="text-h6">SUBZONAS</div>
-              <div class="text-h8 self-end text-warning text-bold ">Zona: {{modelLabelZone}}</div>
+              <div class="text-h8 self-end text-warning text-bold">
+                Zona: {{ modelLabelZone }}
+              </div>
             </div>
           </q-card-section>
 
@@ -91,15 +78,18 @@
               icon="fa-regular fa-square-plus"
               flat
               :disable="modelDisable"
-              style="line-height: 1.5rem;"
+              style="line-height: 1.5rem"
               @click="promptSubZone"
-            > Añadir</q-btn>
+            >
+              Añadir</q-btn
+            >
             <q-btn
               icon="fa-regular fa-square-minus"
               flat
               @click="deleteSubZone"
-              style="line-height: 1.5rem;"
-            >Eliminar</q-btn>
+              style="line-height: 1.5rem"
+              >Eliminar</q-btn
+            >
           </q-card-actions>
 
           <q-separator />
@@ -107,15 +97,8 @@
           <q-card-section>
             <q-scroll-area style="height: 200px">
               <div class="q-pa-sm">
-
-                <q-list
-                  bordered
-                  separator
-                >
-                  <template
-                    v-for="subZone in modelSubZones"
-                    :key="subZone"
-                  >
+                <q-list bordered separator>
+                  <template v-for="subZone in modelSubZones" :key="subZone">
                     <q-item
                       clickable
                       v-ripple
@@ -129,21 +112,18 @@
                           name="fa-solid fa-location-dot"
                         />
                       </q-item-section>
-                      <q-item-section>{{subZone.nameSubZone}}</q-item-section>
+                      <q-item-section>{{ subZone.nameSubZone }}</q-item-section>
                       <q-item-section avatar>
-
                         <q-icon
                           color="cyan-5"
                           size="18px"
                           name="fa-regular fa-pen-to-square"
                           @click="editSubZone(subZone)"
                         />
-
                       </q-item-section>
                     </q-item>
                   </template>
                 </q-list>
-
               </div>
             </q-scroll-area>
           </q-card-section>
@@ -151,19 +131,10 @@
       </div>
       <q-separator />
       <q-card-actions align="right">
-        <q-btn
-          color="primary"
-          label="OK"
-          @click="verificarSubZonas"
-        />
-        <q-btn
-          color="primary"
-          label="Cancel"
-          @click="onCancelClick"
-        />
+        <q-btn color="primary" label="OK" @click="verificarSubZonas" />
+        <q-btn color="primary" label="Cancel" @click="onCancelClick" />
       </q-card-actions>
     </q-card>
-
   </q-dialog>
 </template>
 
@@ -491,7 +462,7 @@ export default {
               }),
             });
           });
-          console.log(modelZones.value);
+          // console.log(modelZones.value);
         }
       } catch (error) {}
     });

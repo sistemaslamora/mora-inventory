@@ -1,9 +1,9 @@
 <template>
-  <div class="q-pa-sm  ">
+  <div class="q-pa-sm">
     <div>
       <q-toolbar
-        class="bg-primary q-mb-md  text-white"
-        style="padding-top: 0.5rem;"
+        class="bg-primary q-mb-md text-white"
+        style="padding-top: 0.5rem"
       >
         <q-btn
           stack
@@ -14,9 +14,8 @@
           label="Guardar"
           @click="saveAll()"
           icon="fa-regular fa-floppy-disk"
-          style="line-height: 1.5rem;"
+          style="line-height: 1.5rem"
         >
-
         </q-btn>
 
         <q-btn
@@ -26,15 +25,11 @@
           no-caps
           label="Eliminar"
           icon="fa-regular fa-trash-can"
-          style="line-height: 1.5rem;"
+          style="line-height: 1.5rem"
         >
         </q-btn>
 
-        <q-separator
-          vertical
-          color="warning"
-          inset
-        />
+        <q-separator vertical color="warning" inset />
 
         <q-btn
           stack
@@ -45,15 +40,11 @@
           @ok="checkData()"
           label="Editar Zonas"
           icon="fa-solid fa-map-location-dot"
-          style="line-height: 1.5rem;"
+          style="line-height: 1.5rem"
         >
         </q-btn>
 
-        <q-separator
-          vertical
-          inset
-          color="warning"
-        />
+        <q-separator vertical inset color="warning" />
 
         <q-btn
           stack
@@ -62,9 +53,9 @@
           no-caps
           class="q-mx-sm"
           label="Importar"
-          @click="showImport=true"
+          @click="showImport = true"
           icon="fa-solid fa-file-import"
-          style="line-height: 1.5rem;"
+          style="line-height: 1.5rem"
         >
         </q-btn>
         <q-btn
@@ -75,15 +66,11 @@
           label="Exportar"
           @click="exportData()"
           icon="fa-solid fa-file-export"
-          style="line-height: 1.5rem;"
-          :disable="templateId?false:true"
+          style="line-height: 1.5rem"
+          :disable="templateId ? false : true"
         >
         </q-btn>
-        <q-separator
-          vertical
-          inset
-          color="warning"
-        />
+        <q-separator vertical inset color="warning" />
 
         <q-btn
           stack
@@ -93,7 +80,7 @@
           label="Atras"
           @click="toBack"
           icon="fa-regular fa-hand-point-left"
-          style="line-height: 1.5rem;"
+          style="line-height: 1.5rem"
         >
         </q-btn>
       </q-toolbar>
@@ -102,7 +89,6 @@
     <div>
       <div>
         <q-splitter v-model="splitterModel">
-
           <template v-slot:before>
             <div>
               <q-input
@@ -121,30 +107,24 @@
                     class="cursor-pointer"
                   />
                 </template>
-                <template v-slot:hint>
-                  Obligatorio
-                </template>
+                <template v-slot:hint> Obligatorio </template>
               </q-input>
-
             </div>
             <div class="q-pa-md">
               <q-tree
                 :nodes="simple"
                 accordion
                 node-key="idSubZone"
+                label-key="label"
                 selected-color="primary"
                 v-model:selected="selected"
                 @update:selected="updateSelected"
-                default-expand-all
               />
             </div>
           </template>
 
           <template v-slot:after>
-            <q-breadcrumbs
-              v-if="breadcumData"
-              class="q-px-md text-orange"
-            >
+            <q-breadcrumbs v-if="breadcumData" class="q-px-md text-orange">
               <q-breadcrumbs-el
                 :label="breadcumData.Zone"
                 icon="fa-solid fa-map-location-dot"
@@ -153,7 +133,6 @@
                 :label="breadcumData.SubZone"
                 icon="fa-solid fa-location-dot"
               />
-
             </q-breadcrumbs>
             <div class="q-pa-sm container">
               <DualListBoxComponent
@@ -169,10 +148,7 @@
       </div>
     </div>
   </div>
-  <ImportDataModel
-    v-if="showImport"
-    @import="onImportData"
-  />
+  <ImportDataModel v-if="showImport" @import="onImportData" />
 </template>
 
 <script lang="ts">
@@ -234,6 +210,7 @@ export default defineComponent({
     let templateId = 0;
     const modelDescription = ref('');
     const { supabase } = useSupabase();
+    const first = ref([]);
 
     const options = ref([
       {
@@ -541,6 +518,15 @@ export default defineComponent({
       }
     };
 
+    const onLazyLoad = ({ node, key, done, fail }) => {
+      if (node.length < 1) {
+        done([]);
+        return;
+      }
+      done = simple.value;
+      console.log(done, 'done');
+    };
+
     const checkData = async (data: any[]) => {
       try {
         if (data) {
@@ -559,6 +545,7 @@ export default defineComponent({
               type: 'father',
               icon: 'fa-solid fa-map-location-dot',
               selectable: false,
+
               children: element.subZone?.map((y) => {
                 return {
                   label: y.nameSubZone,
@@ -806,6 +793,7 @@ export default defineComponent({
       saveAll,
       exportData,
       onImportData,
+      onLazyLoad,
     };
   },
 });
