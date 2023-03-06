@@ -107,7 +107,7 @@
                   />
                 </div>
               </div>
-              <div style="width: 100%">
+              <div style="padding-top: 1rem; width: 100%">
                 <hot-table
                   ref="tableInstance"
                   :settings="hotSettings"
