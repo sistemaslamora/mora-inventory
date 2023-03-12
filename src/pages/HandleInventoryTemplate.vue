@@ -276,7 +276,7 @@ export default defineComponent({
       for (let i = 0; i < listItems.value.length; i++) {
         for (let j = 0; j < arr.length; j++) {
           if (listItems.value[i].idZone === arr[j].idZone) {
-            console.log(i);
+            //  console.log(i);
             listItems.value.splice(i, 1);
             i = 0;
           }
@@ -289,7 +289,7 @@ export default defineComponent({
       for (let i = 0; i < listItems.value.length; i++) {
         for (let j = 0; j < arr.length; j++) {
           if (listItems.value[i].idSubZone === arr[j].idSubZone) {
-            console.log(i);
+            // console.log(i);
             listItems.value.splice(i, 1);
             i = 0;
           }
@@ -358,7 +358,7 @@ export default defineComponent({
             item_descripcion: x.item_descripcion,
           };
         });
-        console.log('arr', arr);
+        // console.log('arr', arr);
 
         const t = simple.value[0];
         selected.value = t.children[0].idSubZone;
@@ -492,7 +492,7 @@ export default defineComponent({
         } else {
           router.push('/managerinventorytemplate');
         }
-        console.log('respose', response.value);
+        //  console.log('respose', response.value);
       } catch (error) {
         console.log('mark:4B67FB683345', error);
       }
@@ -524,7 +524,7 @@ export default defineComponent({
         return;
       }
       done = simple.value;
-      console.log(done, 'done');
+      // console.log(done, 'done');
     };
 
     const checkData = async (data: any[]) => {
@@ -770,7 +770,7 @@ export default defineComponent({
 
     const onUpdateItems = (data) => {
       listItems.value = data;
-      console.log('listitems', data);
+      //  console.log('listitems', data);
     };
 
     return {
