@@ -455,6 +455,7 @@ export default {
     const generarTempListaEdit = async (tId, show) => {
       try {
         let tempItems = [];
+        let toStoreItems = [];
         if (show === 2) {
           rowsTemp.value = [];
 
@@ -464,7 +465,7 @@ export default {
             .eq('pis_piz_pi_id', tId);
           if (result.status === 200) {
             tempItems = result.data;
-            //       console.log('temps', result);
+            console.log('temps', result.data);
             mainRestList.value.map((x: any) => {
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
@@ -483,6 +484,15 @@ export default {
                   //     parseInt(x.item_id)
                   // );
                   generalList.value.push({
+                    idTemplate: tempItems[i].pis_piz_pi_id,
+                    idZone: tempItems[i].pis_piz_id,
+                    idSubZone: tempItems[i].pis_id,
+                    item_id: x.item_id,
+                    item_descripcion: x.item_descripcion,
+                    item_unidad: x.unidadmedidainsumo_descripcion,
+                    item_qty: tempItems[i].qty ? tempItems[i].qty : null,
+                  });
+                  toStoreItems.push({
                     idTemplate: tempItems[i].pis_piz_pi_id,
                     idZone: tempItems[i].pis_piz_id,
                     idSubZone: tempItems[i].pis_id,
@@ -906,7 +916,7 @@ export default {
         await CompareList();
         $q.loading.hide();
         try {
-          let tempItems = [];
+          let duplicado = [];
 
           rowsTemp.value = [];
           generalList.value = [];
@@ -915,7 +925,29 @@ export default {
             .select()
             .eq('pis_piz_pi_id', idTemplate.value);
           if (result.status === 200) {
-            tempItems = result.data;
+            duplicado = result.data;
+            const tempItems = duplicado.reduce((acumulador, valorActual) => {
+              const elementoYaExiste = acumulador.find(
+                (elemento) => elemento.item === valorActual.item
+              );
+              if (elementoYaExiste) {
+                return acumulador.map((elemento) => {
+                  if (elemento.item === valorActual.item) {
+                    return {
+                      ...elemento,
+                      qty: elemento.qty
+                        ? parseFloat(elemento.qty) + parseFloat(valorActual.qty)
+                        : 0,
+                    };
+                  }
+
+                  return elemento;
+                });
+              }
+
+              return [...acumulador, valorActual];
+            }, []);
+            console.log(tempItems, 'temp');
             console.log('comp', compareRestList.value);
             compareRestList.value.map((x: any) => {
               let index = -1;
@@ -1065,7 +1097,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-::v-deep .handsontable .wtHider {
+:deep .handsontable .wtHider {
   width: auto !important;
 }
 ._filters--web {

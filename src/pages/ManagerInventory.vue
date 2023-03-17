@@ -12,6 +12,7 @@
         icon="fa-solid fa-file-circle-plus"
         style="line-height: 1.5rem"
       >
+        <q-tooltip class="bg-dark">Crear Inventario</q-tooltip>
       </q-btn>
 
       <!-- <q-btn
@@ -91,6 +92,7 @@
         icon="fas fa-search"
         style="line-height: 1.5rem"
       >
+        <q-tooltip class="bg-dark">Buscar</q-tooltip>
       </q-btn>
     </q-toolbar>
 
@@ -125,7 +127,9 @@
               color="grey"
               @click="editRow(props)"
               icon="far fa-edit"
-            ></q-btn>
+            >
+              <q-tooltip class="bg-dark">Editar Inventario</q-tooltip>
+            </q-btn>
             <q-btn
               dense
               round
@@ -133,15 +137,19 @@
               color="grey"
               @click="setTemplate(props)"
               icon="far fa-file-excel"
-            ></q-btn>
+            >
+              <q-tooltip class="bg-dark">Excel Para Restaurant</q-tooltip>
+            </q-btn>
             <q-btn
               dense
               round
               flat
               color="grey"
               @click="createTemplate(props)"
-              icon="far fa-file-excel"
-            ></q-btn>
+              icon="fas fa-tools"
+            >
+              <q-tooltip class="bg-dark">Plantillas en excel</q-tooltip>
+            </q-btn>
           </q-td>
         </template>
       </q-table>
@@ -203,7 +211,8 @@ export default defineComponent({
     const valor = ref([]);
     const files = ref(null);
     const mainRestList = ref([]);
-    const generalList = ref([]);
+    let generalList = [];
+    const generalTemplate = ref([]);
     const optionsList = ref([
       {
         label: 'Insumo',
@@ -400,6 +409,46 @@ export default defineComponent({
       }
     };
 
+    const generarTemplateList = async (tId, show) => {
+      try {
+        let tempItems = [];
+        if (show === 2) {
+          let result = await supabase.rpc('gettemplatetoexel', {
+            idtemplate: tId,
+          });
+          if (result.status === 200) {
+            tempItems = result.data;
+            // console.log('temps', mainRestList.value);
+            mainRestList.value.map((x: any) => {
+              let index = -1;
+              for (let i = 0, len = tempItems.length; i < len; i++) {
+                if (tempItems[i].item === parseInt(x.item_id)) {
+                  generalTemplate.value.push({
+                    zona: tempItems[i].zone,
+                    subzona: tempItems[i].subzone,
+                    id: x.item_id,
+                    producto: x.item_descripcion,
+                    tipo: obtenerTipo(x.item_prefijo),
+                    unidadMedida: x.unidadmedidainsumo_descripcion,
+                    stockActual: 0,
+                    stockContado: tempItems[i].qty ? tempItems[i].qty : '',
+                  });
+                }
+              }
+            });
+
+            // context.emit('onUpdate', generalList.value);
+          } else {
+            console.log(
+              result.error ? result.error : 'response' + result.statusText
+            );
+          }
+        }
+      } catch (error) {
+        console.log('mark:EDDA40AD3C64', error);
+      }
+    };
+
     const generarTempListaEdit = async (tId, show) => {
       try {
         let tempItems = [];
@@ -415,7 +464,7 @@ export default defineComponent({
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
                 if (tempItems[i].item === parseInt(x.item_id)) {
-                  generalList.value.push({
+                  generalList.push({
                     id: x.item_id,
                     codigo: x.item_id,
                     producto: x.item_descripcion,
@@ -581,12 +630,37 @@ export default defineComponent({
     };
 
     const setTemplate = async (data) => {
-      generalList.value = [];
+      generalList = [];
       let rowStyle = [];
       const headerTime = moment().format('DD/MM/YYYY hh:mm A');
       $q.loading.show();
       await generarLista(2);
       await generarTempListaEdit(data.row.id, 2);
+
+      const duplicado = generalList.reduce((acumulador, valorActual) => {
+        const elementoYaExiste = acumulador.find(
+          (elemento) => elemento.id === valorActual.id
+        );
+        if (elementoYaExiste) {
+          return acumulador.map((elemento) => {
+            if (elemento.id === valorActual.id) {
+              return {
+                ...elemento,
+                stockContado:
+                  elemento.stockContado !== ''
+                    ? parseFloat(elemento.stockContado) +
+                      parseFloat(valorActual.stockContado)
+                    : 0,
+              };
+            }
+
+            return elemento;
+          });
+        }
+
+        return [...acumulador, valorActual];
+      }, []);
+
       const wb = XLSX.utils.book_new();
       //   const ws = XLSX.utils.json_to_sheet([]);
       const border = {
@@ -1515,7 +1589,7 @@ export default defineComponent({
         row10,
       ];
 
-      generalList.value.forEach((x) => {
+      duplicado.forEach((x) => {
         heading.push([
           {
             v: x.id,
@@ -1726,7 +1800,7 @@ export default defineComponent({
       XLSX.utils.book_append_sheet(wb, ws, 'InsumosYProductosParaCuadre');
 
       // STEP 4: Write Excel file to browser
-      XLSX.writeFile(wb, 'xx.xlsx');
+      XLSX.writeFile(wb, 'plantilladeinventariorestaurant.xlsx');
 
       // eslint-disable-next-line quotes
       console.log(
@@ -1736,12 +1810,20 @@ export default defineComponent({
     };
 
     const createTemplate = async (data) => {
-      generalList.value = [];
+      generalList = [];
       let rowStyle = [];
       const headerTime = moment().format('DD/MM/YYYY hh:mm A');
       $q.loading.show();
       await generarLista(2);
-      await generarTempListaEdit(data.row.id, 2);
+      await generarTemplateList(data.row.id, 2);
+      // console.log('output->generalList.value', generalTemplate.value);
+
+      const result = generalTemplate.value.reduce((acc, curr) => {
+        acc[curr.zona] = acc[curr.zona] || [];
+        acc[curr.zona].push({ ident: curr });
+        return acc;
+      }, {});
+
       const wb = XLSX.utils.book_new();
       //   const ws = XLSX.utils.json_to_sheet([]);
       const border = {
@@ -1785,13 +1867,18 @@ export default defineComponent({
 
       let row10 = [
         {
-          v: 'ID',
+          v: 'Zona',
           t: 's',
           s: '',
         },
 
         {
-          v: 'Producto/Insumo',
+          v: 'subZona',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Id',
           t: 's',
           s: '',
         },
@@ -1800,99 +1887,113 @@ export default defineComponent({
           t: 's',
           s: '',
         },
+
         {
-          v: 'Unidad Medida',
+          v: 'Producto',
           t: 's',
           s: '',
         },
-
         {
-          v: 'Stock contado',
+          v: 'Unidad',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Cantidad',
           t: 's',
           s: '',
         },
       ];
-      const heading = [row10];
 
-      generalList.value.forEach((x) => {
-        heading.push([
-          {
-            v: x.id,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.codigo,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.producto,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.tipo,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.unidadMedida,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.stockContado,
-            t: 's',
-            s: '',
-          },
-        ]);
-        // if (i < generalList.value.length) {
-        //   rowStyle[0].v = generalList.value[i].id;
-        //   rowStyle[1].v = generalList.value[i].codigo;
-        //   rowStyle[2].v = generalList.value[i].producto;
-        //   rowStyle[3].v = generalList.value[i].tipo;
-        // }
+      Object.entries(result).forEach(([key, value]) => {
+        const heading = [row10];
+        generalTemplate.value.forEach((x) => {
+          if (key === x.zona) {
+            heading.push([
+              {
+                v: x.zona,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.subzona,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.id,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.tipo,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.producto,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.unidadMedida,
+                t: 's',
+                s: '',
+              },
+              {
+                v: '',
+                t: 's',
+                s: '',
+              },
+            ]);
+            // if (i < generalList.value.length) {
+            //   rowStyle[0].v = generalList.value[i].id;
+            //   rowStyle[1].v = generalList.value[i].codigo;
+            //   rowStyle[2].v = generalList.value[i].producto;
+            //   rowStyle[3].v = generalList.value[i].tipo;
+            // }
+          }
+        });
+
+        //  heading.push(rowStyle);
+
+        // const merge = { s: { r: 0, c: 0 }, e: { r: 1, c: 2 } };
+        // const merge1 = { s: { r: 0, c: 3 }, e: { r: 1, c: 5 } };
+        // const merge2 = { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } };
+        // const merge3 = { s: { r: 2, c: 3 }, e: { r: 2, c: 5 } };
+        // const merge4 = { s: { r: 3, c: 0 }, e: { r: 3, c: 1 } };
+        // const merge5 = { s: { r: 4, c: 1 }, e: { r: 4, c: 2 } };
+        // const merge6 = { s: { r: 4, c: 5 }, e: { r: 4, c: 6 } };
+        // const merge7 = { s: { r: 4, c: 8 }, e: { r: 4, c: 9 } };
+        // const merge8 = { s: { r: 5, c: 1 }, e: { r: 5, c: 2 } };
+        // const merge9 = { s: { r: 5, c: 4 }, e: { r: 6, c: 4 } };
+        // const merge10 = { s: { r: 5, c: 5 }, e: { r: 6, c: 9 } };
+        // const merge11 = { s: { r: 6, c: 1 }, e: { r: 6, c: 2 } };
+        // const merge12 = { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } };
+
+        // STEP 3: Create Worksheet, add data, set cols widths
+        const ws = XLSX.utils.aoa_to_sheet(heading);
+        //   ws['!cols'] = [{ width: 20 }, { width: 20 }, { width: 40 },{ width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }];
+        //    ws['!rows'] = [{height:23}]
+        if (!ws['!merges']) ws['!merges'] = [];
+        // ws['!merges'].push(merge);
+        // ws['!merges'].push(merge1);
+        // ws['!merges'].push(merge2);
+        // ws['!merges'].push(merge3);
+        // ws['!merges'].push(merge4);
+        // ws['!merges'].push(merge5);
+        // ws['!merges'].push(merge6);
+        // ws['!merges'].push(merge7);
+        // ws['!merges'].push(merge8);
+        // ws['!merges'].push(merge9);
+        // ws['!merges'].push(merge10);
+        // ws['!merges'].push(merge11);
+        // ws['!merges'].push(merge12);
+        $q.loading.hide();
+        //    XLSX.utils.sheet_add_aoa(ws1b,{origin: 'A1'});
+        //   XLSX.utils.sheet_add_json(ws,rows,{ origin: 'A12', skipHeader: true });
+        XLSX.utils.book_append_sheet(wb, ws, key);
       });
-
-      //  heading.push(rowStyle);
-
-      // const merge = { s: { r: 0, c: 0 }, e: { r: 1, c: 2 } };
-      // const merge1 = { s: { r: 0, c: 3 }, e: { r: 1, c: 5 } };
-      // const merge2 = { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } };
-      // const merge3 = { s: { r: 2, c: 3 }, e: { r: 2, c: 5 } };
-      // const merge4 = { s: { r: 3, c: 0 }, e: { r: 3, c: 1 } };
-      // const merge5 = { s: { r: 4, c: 1 }, e: { r: 4, c: 2 } };
-      // const merge6 = { s: { r: 4, c: 5 }, e: { r: 4, c: 6 } };
-      // const merge7 = { s: { r: 4, c: 8 }, e: { r: 4, c: 9 } };
-      // const merge8 = { s: { r: 5, c: 1 }, e: { r: 5, c: 2 } };
-      // const merge9 = { s: { r: 5, c: 4 }, e: { r: 6, c: 4 } };
-      // const merge10 = { s: { r: 5, c: 5 }, e: { r: 6, c: 9 } };
-      // const merge11 = { s: { r: 6, c: 1 }, e: { r: 6, c: 2 } };
-      // const merge12 = { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } };
-
-      // STEP 3: Create Worksheet, add data, set cols widths
-      const ws = XLSX.utils.aoa_to_sheet(heading);
-      //   ws['!cols'] = [{ width: 20 }, { width: 20 }, { width: 40 },{ width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }];
-      //    ws['!rows'] = [{height:23}]
-      if (!ws['!merges']) ws['!merges'] = [];
-      // ws['!merges'].push(merge);
-      // ws['!merges'].push(merge1);
-      // ws['!merges'].push(merge2);
-      // ws['!merges'].push(merge3);
-      // ws['!merges'].push(merge4);
-      // ws['!merges'].push(merge5);
-      // ws['!merges'].push(merge6);
-      // ws['!merges'].push(merge7);
-      // ws['!merges'].push(merge8);
-      // ws['!merges'].push(merge9);
-      // ws['!merges'].push(merge10);
-      // ws['!merges'].push(merge11);
-      // ws['!merges'].push(merge12);
-      $q.loading.hide();
-      //    XLSX.utils.sheet_add_aoa(ws1b,{origin: 'A1'});
-      //   XLSX.utils.sheet_add_json(ws,rows,{ origin: 'A12', skipHeader: true });
-      XLSX.utils.book_append_sheet(wb, ws, 'sheet1');
 
       // STEP 4: Write Excel file to browser
       XLSX.writeFile(wb, 'Template.xlsx');
@@ -1903,6 +2004,7 @@ export default defineComponent({
         `\n--------------------==~==~==~==[ ...DEMO COMPLETE ]==~==~==~==--------------------\n\n`
       );
     };
+
     return {
       columns,
       rows,
@@ -1969,11 +2071,11 @@ export default defineComponent({
   width: 100%;
 }
 
-::v-deep(.q-field__native .q-placeholder) {
+:deep(.q-field__native .q-placeholder) {
   color: white;
 }
 
-::v-deep(.q-field--with-bottom) {
+:deep(.q-field--with-bottom) {
   padding-bottom: 0px;
 }
 </style>
