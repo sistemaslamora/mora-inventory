@@ -231,23 +231,6 @@ export default {
       },
     ]);
 
-    // let restModel: RestaurantModel =[
-    //    data: {
-    //           almacen_id: '',
-    //           almacen_descripcion: '',
-    //           cantidad: 0,
-    //           costo: 0,
-    //           item_descripcion: '',
-    //           categoria_descripcion: '',
-    //           unidadmedidainsumo_descripcion: '',
-    //           item_id: '',
-    //           item_tipo: 0,
-    //           item_subtipo: 0,
-    //           item_prefijo: '',
-
-    //         },
-    //   ],
-
     const filterType = () => {
       try {
         if (mainRestList.value.length > 0) {
@@ -288,15 +271,15 @@ export default {
         if (show === '2') {
           rowsTemp.value = [];
           generalList.value = importList;
-          generalList.value.forEach((x) => {
-            let j = rowsDb.value.findIndex(
-              (data) => data.item_id === x.item_id
-            );
+          // generalList.value.forEach((x) => {
+          //   let j = rowsDb.value.findIndex(
+          //     (data) => data.item_id === x.item_id
+          //   );
 
-            if (j !== -1) {
-              rowsDb.value.splice(j, 1);
-            }
-          });
+          //   if (j !== -1) {
+          //     rowsDb.value.splice(j, 1);
+          //   }
+          // });
 
           rowsTemp.value = generalList.value.filter(
             (x) => x.idSubZone === subzone
@@ -336,20 +319,13 @@ export default {
                   item_id: x.item_id,
                   item_descripcion: x.item_descripcion,
                 });
-                let j = rowsDb.value.findIndex(
-                  (data) => data.item_id === x.item_id
-                );
+                // let j = rowsDb.value.findIndex(
+                //   (data) => data.item_id === x.item_id
+                // );
 
-                if (j !== -1) {
-                  rowsDb.value.splice(j, 1);
-                }
-                // rowsTemp.value.push({
-                //   idTemplate: tempItems[i].pls_plz_pli_id,
-                //   idZone: tempItems[i].pls_plz_id,
-                //   idSubZone: tempItems[i].pls_id,
-                //   item_id: x.item_id,
-                //   item_descripcion: x.item_descripcion,
-                // });
+                // if (j !== -1) {
+                //   rowsDb.value.splice(j, 1);
+                // }
               }
               rowsTemp.value = generalList.value.filter(
                 (x) => x.idSubZone === props.selected.idSubZone
@@ -367,17 +343,17 @@ export default {
 
     const restoreData = (evt, row) => {
       try {
-        rowsDb.value.push(row);
-        rowsDb.value.sort(function (a, b) {
-          if (a.item_descripcion > b.item_descripcion) {
-            return 1;
-          }
-          if (a.item_descripcion < b.item_descripcion) {
-            return -1;
-          }
-          // a must be equal to b
-          return 0;
-        });
+        // rowsDb.value.push(row);
+        // rowsDb.value.sort(function (a, b) {
+        //   if (a.item_descripcion > b.item_descripcion) {
+        //     return 1;
+        //   }
+        //   if (a.item_descripcion < b.item_descripcion) {
+        //     return -1;
+        //   }
+        //   // a must be equal to b
+        //   return 0;
+        // });
         // console.log('rowsdb', rowsDb.value);
         let i = rowsTemp.value.findIndex(
           (data) => data.item_id === row.item_id
@@ -399,27 +375,33 @@ export default {
             item_id: row.item_id,
             item_descripcion: row.item_descripcion,
           };
-          const allData = { ...props.selected, ...rowData };
-          rowsTemp.value.push(allData);
-          generalList.value.push(allData);
-          // console.log('general', generalList.value);
-          rowsTemp.value.sort(function (a, b) {
-            if (a.item_descripcion > b.item_descripcion) {
-              return 1;
-            }
-            if (a.item_descripcion < b.item_descripcion) {
-              return -1;
-            }
-            // a must be equal to b
-            return 0;
-          });
-          // console.log('rowsdb', rowsDb.value);
-          let i = rowsDb.value.findIndex(
+          //console.log(row);
+          let j = rowsTemp.value.findIndex(
             (data) => data.item_id === rowData.item_id
           );
+          if (j === -1) {
+            const allData = { ...props.selected, ...rowData };
+            rowsTemp.value.push(allData);
+            generalList.value.push(allData);
+            // console.log('general', generalList.value);
+            rowsTemp.value.sort(function (a, b) {
+              if (a.item_descripcion > b.item_descripcion) {
+                return 1;
+              }
+              if (a.item_descripcion < b.item_descripcion) {
+                return -1;
+              }
+              // a must be equal to b
+              return 0;
+            });
+            // console.log('rowsdb', rowsDb.value);
+            // let i = rowsDb.value.findIndex(
+            //   (data) => data.item_id === rowData.item_id
+            // );
 
-          if (i !== -1) {
-            rowsDb.value.splice(i, 1);
+            // if (i !== -1) {
+            //   rowsDb.value.splice(i, 1);
+            // }
           }
           context.emit('onUpdate', generalList.value);
         }

@@ -211,6 +211,7 @@ export default defineComponent({
     const modelDescription = ref('');
     const { supabase } = useSupabase();
     const first = ref([]);
+    let isSave = true;
 
     const options = ref([
       {
@@ -247,26 +248,30 @@ export default defineComponent({
 
     const toBack = () => {
       try {
-        $q.dialog({
-          title: 'Confirmar',
-          message:
-            'Esta seguro que desea salir, es posible que no haya guardado',
-          cancel: true,
-          persistent: true,
-        })
-          .onOk(() => {
-            // console.log('>>>> OK')
-            router.go(-1);
+        if (!isSave) {
+          $q.dialog({
+            title: 'Confirmar',
+            message:
+              'Esta seguro que desea salir, es posible que no haya guardado',
+            cancel: true,
+            persistent: true,
           })
-          .onOk(() => {
-            // console.log('>>>> second OK catcher')
-          })
-          .onCancel(() => {
-            // console.log('>>>> Cancel')
-          })
-          .onDismiss(() => {
-            // console.log('I am triggered on both OK and Cancel')
-          });
+            .onOk(() => {
+              // console.log('>>>> OK')
+              router.go(-1);
+            })
+            .onOk(() => {
+              // console.log('>>>> second OK catcher')
+            })
+            .onCancel(() => {
+              // console.log('>>>> Cancel')
+            })
+            .onDismiss(() => {
+              // console.log('I am triggered on both OK and Cancel')
+            });
+        } else {
+          router.go(-1);
+        }
       } catch (error) {
         console.log('mark:EF7259BC17FC', error);
       }
@@ -345,6 +350,7 @@ export default defineComponent({
     };
 
     const onImportData = async (json) => {
+      isSave = false;
       showImport.value = false;
 
       if (json.length > 0) {
@@ -530,6 +536,7 @@ export default defineComponent({
     const checkData = async (data: any[]) => {
       try {
         if (data) {
+          isSave = false;
           visible.value = '1';
           // const params = {
           //   store: '6',
@@ -744,6 +751,7 @@ export default defineComponent({
 
     const saveAll = async () => {
       try {
+        isSave = true;
         if (verifyDescription() && verifyTreeData() && verifyItems()) {
           const tId = listItems.value[0].idTemplate
             ? listItems.value[0].idTemplate
@@ -755,9 +763,9 @@ export default defineComponent({
             $q.notify({
               position: 'top',
               type: 'positive',
-              message: `Se ha creado la plantila ${modelDescription.value}`,
+              message: `Se han guardado los cambios en la plantila ${modelDescription.value}`,
             });
-            router.push('/managerinventorytemplate');
+            // router.push('/managerinventorytemplate');
           }
         } else {
           showNotif(message);
@@ -769,6 +777,7 @@ export default defineComponent({
     };
 
     const onUpdateItems = (data) => {
+      isSave = false;
       listItems.value = data;
       //  console.log('listitems', data);
     };
