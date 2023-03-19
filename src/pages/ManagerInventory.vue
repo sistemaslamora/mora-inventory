@@ -55,13 +55,8 @@
                     minimal
                     :locale="myLocale"
                   >
-                    <div class="row items-center justify-start">
-                      <q-btn
-                        v-close-popup
-                        label="Cerrar"
-                        color="primary"
-                        flat
-                      />
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Ok" color="primary" flat />
                     </div>
                   </q-date>
                 </q-popup-proxy>
@@ -202,6 +197,7 @@ import useSupabase from '../boot/supabase';
 import XLSX from 'xlsx-js-style';
 import readXlsFile from 'read-excel-file';
 import { useUserStore } from '../stores/roles';
+import { store } from 'quasar/wrappers';
 
 export default defineComponent({
   components: {
@@ -2011,9 +2007,9 @@ export default defineComponent({
 
     const CompareList = async (tId) => {
       try {
-        // console.log('storeid', props.storeId);
+        console.log('storeid', tId);
         const params = {
-          store: parseInt(storeId.value.toString()),
+          store: parseInt(tId),
           dateInv: moment(dateInventory.value).format(
             'YYYY-MM-DD' + '%20' + '23:00:00'
           ),
@@ -2042,17 +2038,17 @@ export default defineComponent({
       }
     };
 
-    const verify = async (tId, show) => {
+    const verify = async (data, show) => {
       try {
         compareRestList = [];
         $q.loading.show();
-        await CompareList(tId);
+        await CompareList(data.store_id);
         $q.loading.hide();
         try {
           let duplicado = [];
           if (show === 2) {
             let result = await supabase.rpc('gettemplatetoexel', {
-              idtemplate: tId,
+              idtemplate: data.id,
             });
             if (result.status === 200) {
               duplicado = result.data;
@@ -2112,10 +2108,11 @@ export default defineComponent({
 
     const createTemplateManager = async (data) => {
       generalList = [];
-
+      console.log('output->data', data);
       $q.loading.show();
+
       //await generarLista(2);
-      await verify(data.row.id, 2);
+      await verify(data.row, 2);
       // console.log('output->generalList.value', generalTemplate.value);
 
       const result = generalTemplate.reduce((acc, curr) => {
