@@ -125,7 +125,8 @@
                     data="item_unidad"
                   >
                   </hot-column>
-                  <hot-column title="Cantidad" data="item_qty"> </hot-column>
+                  <hot-column title="Cantidad" data="item_qty" type="numeric">
+                  </hot-column>
                 </hot-table>
               </div>
             </q-page>
@@ -154,37 +155,6 @@ import 'handsontable/dist/handsontable.full.css';
 import { useAuthState } from '@vueauth/core';
 
 registerAllModules();
-const columnsTemp = [
-  {
-    name: 'description',
-    label: 'Descripción',
-    align: 'left',
-    field: (row) => row.item_descripcion,
-    format: (val) => `${val}`,
-    sortable: true,
-    headerStyle: 'width: 65%',
-  },
-  {
-    name: 'unidad',
-    required: true,
-    label: 'Unidad',
-    align: 'left',
-    field: (row) => row.item_unidad,
-    format: (val) => `${val}`,
-    sortable: true,
-    style: 'width: 25%',
-  },
-  {
-    name: 'qty',
-    required: true,
-    label: 'Conteo',
-    align: 'right',
-    field: (row) => row.item_qty,
-    format: (val) => `${val}`,
-    sortable: true,
-    headerStyle: 'width: 10%',
-  },
-];
 
 export default {
   emits: ['onAccept', 'onClose'],
@@ -432,14 +402,16 @@ export default {
           const body = change[0][0];
 
           const value = rowsTemp.value[body];
-          const { data, error } = await supabase
-            .from('bizphysicalinventoryitems')
-            .update({ qty: value.item_qty })
-            .eq('item', value.item_id)
-            .eq('pis_piz_pi_id', value.idTemplate)
-            .eq('pis_piz_id', value.idZone)
-            .eq('pis_id', value.idSubZone);
-          // console.log(value, 'value');
+          if (typeof value.item_qty === 'number') {
+            const { data, error } = await supabase
+              .from('bizphysicalinventoryitems')
+              .update({ qty: value.item_qty })
+              .eq('item', value.item_id)
+              .eq('pis_piz_pi_id', value.idTemplate)
+              .eq('pis_piz_id', value.idZone)
+              .eq('pis_id', value.idSubZone);
+            // console.log(value, 'value');
+          }
         }
       } catch (error) {
         console.log(error);
@@ -465,7 +437,7 @@ export default {
             .eq('pis_piz_pi_id', tId);
           if (result.status === 200) {
             tempItems = result.data;
-            console.log('temps', result.data);
+            //  console.log('temps', result.data);
             mainRestList.value.map((x: any) => {
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
@@ -901,9 +873,9 @@ export default {
           .from('bizphysicalinventoryitems')
           .update({ status: val })
           .eq('item', value.item)
-          .eq('pis_piz_pi_id', value.pis_piz_pi_id)
-          .eq('pis_piz_id', value.pis_piz_id)
-          .eq('pis_id', value.pis_id);
+          .eq('pis_piz_pi_id', value.pis_piz_pi_id);
+        // .eq('pis_piz_id', value.pis_piz_id)
+        // .eq('pis_id', value.pis_id);
       } catch (error) {
         console.log(error);
       }
@@ -947,8 +919,8 @@ export default {
 
               return [...acumulador, valorActual];
             }, []);
-            console.log(tempItems, 'temp');
-            console.log('comp', compareRestList.value);
+            //  console.log(tempItems, 'temp');
+            //   console.log('comp', compareRestList.value);
             compareRestList.value.map((x: any) => {
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
@@ -959,20 +931,21 @@ export default {
                     if (tempItems[i].status === 1) {
                       evaluate(tempItems[i], 0);
                     }
-                    generalList.value.push({
-                      idTemplate: tempItems[i].pis_piz_pi_id,
-                      idZone: tempItems[i].pis_piz_id,
-                      idSubZone: tempItems[i].pis_id,
-                      item_id: x.item_id,
-                      item_descripcion: x.item_descripcion,
-                      item_unidad: x.unidadmedidainsumo_descripcion,
-                      item_qty: tempItems[i].qty ? tempItems[i].qty : null,
-                    });
+
+                    // generalList.value.push({
+                    //   idTemplate: tempItems[i].pis_piz_pi_id,
+                    //   idZone: tempItems[i].pis_piz_id,
+                    //   idSubZone: tempItems[i].pis_id,
+                    //   item_id: x.item_id,
+                    //   item_descripcion: x.item_descripcion,
+                    //   item_unidad: x.unidadmedidainsumo_descripcion,
+                    //   item_qty: tempItems[i].qty ? tempItems[i].qty : null,
+                    // });
                   }
                 }
               }
             });
-
+            await generarTempListaEdit(idTemplate.value, 2);
             rowsTemp.value = generalList.value.filter(
               (x) => x.idSubZone === treeData.value.idSubZone
             );
@@ -1057,7 +1030,6 @@ export default {
       treeData,
       breadcumData,
       generalList,
-      columnsTemp,
       rowsTemp,
       filterTemp,
       playSimulate,

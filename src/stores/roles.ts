@@ -22,7 +22,6 @@ export const useUserStore = defineStore('user', {
       this.user.Role = info.Role;
       this.user.UserId = info.UserId;
       this.user.Email = info.Email;
-      console.log('output->info', info);
     },
   },
 });

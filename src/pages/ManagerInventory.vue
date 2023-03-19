@@ -2,6 +2,7 @@
   <div class="q-pa-md q-gutter-y-sm">
     <q-toolbar class="bg-primary q-py-sm text-white" style="padding-top: 1rem">
       <q-btn
+        v-if="havePermise(permiseAdmin)"
         stack
         flat
         size="12px"
@@ -131,6 +132,7 @@
               <q-tooltip class="bg-dark">Editar Inventario</q-tooltip>
             </q-btn>
             <q-btn
+              v-if="havePermise(permiseAdmin)"
               dense
               round
               flat
@@ -141,6 +143,7 @@
               <q-tooltip class="bg-dark">Excel Para Restaurant</q-tooltip>
             </q-btn>
             <q-btn
+              v-if="havePermise(permiseAdmin)"
               dense
               round
               flat
@@ -149,6 +152,19 @@
               icon="fas fa-tools"
             >
               <q-tooltip class="bg-dark">Plantillas en excel</q-tooltip>
+            </q-btn>
+            <q-btn
+              v-if="havePermise(permiseManager)"
+              dense
+              round
+              flat
+              color="grey"
+              @click="createTemplateManager(props)"
+              icon="fas fa-user-ninja"
+            >
+              <q-tooltip class="bg-dark"
+                >Plantillas en excel Controller</q-tooltip
+              >
             </q-btn>
           </q-td>
         </template>
@@ -185,6 +201,7 @@ import PysicalInventory from '../components/PhysicalInventory.vue';
 import useSupabase from '../boot/supabase';
 import XLSX from 'xlsx-js-style';
 import readXlsFile from 'read-excel-file';
+import { useUserStore } from '../stores/roles';
 
 export default defineComponent({
   components: {
@@ -192,6 +209,7 @@ export default defineComponent({
     PysicalInventory,
   },
   setup() {
+    const userStore = useUserStore();
     const $q = useQuasar();
     // const items = ref([]);
     const tipo = ref(null);
@@ -206,13 +224,10 @@ export default defineComponent({
     const dateInventory = ref('');
     const description = ref('');
     const { supabase } = useSupabase();
-    const jsonExcel = ref();
-    const items = ref([]);
-    const valor = ref([]);
-    const files = ref(null);
+    let compareRestList = [];
     const mainRestList = ref([]);
     let generalList = [];
-    const generalTemplate = ref([]);
+    let generalTemplate = [];
     const optionsList = ref([
       {
         label: 'Insumo',
@@ -245,6 +260,9 @@ export default defineComponent({
         dbVal: 7,
       },
     ]);
+    const permiseAll = ref('SuperAdmin,Administradores,Controller,Usuarios');
+    const permiseAdmin = ref('SuperAdmin,Administradores,Controller');
+    const permiseManager = ref('SuperAdmin,Controller');
 
     const schema = {
       IdRest: {
@@ -278,6 +296,7 @@ export default defineComponent({
         type: String,
       },
     };
+
     const columns: QTableProps['columns'] = [
       {
         name: 'Almacen',
@@ -317,7 +336,42 @@ export default defineComponent({
       },
       { name: 'actions', label: 'Actions', field: '', align: 'center' },
     ];
+
     const visibleColumns = ref(['CreateBy', 'CreateAt', 'actions']);
+
+    const optionsTipo = ref([
+      {
+        label: 'Insumo',
+        value: '(I)',
+        dbVal: 1,
+      },
+      {
+        label: 'Producto',
+        value: '(P)',
+        dbVal: 2,
+      },
+      {
+        label: 'Descartable',
+        value: '(D)',
+        dbVal: 6,
+      },
+      {
+        label: 'Consumible',
+        value: '(C)',
+        dbVal: 8,
+      },
+      {
+        label: 'Receta',
+        value: '(R)',
+        dbVal: 3,
+      },
+      {
+        label: 'Derivado',
+        value: '(De)',
+        dbVal: 7,
+      },
+    ]);
+
     const options = ref([
       {
         label: 'Almacen San Isidro',
@@ -346,6 +400,15 @@ export default defineComponent({
     ]);
 
     const rows = ref([]);
+
+    const havePermise = (link) => {
+      if (link.indexOf(userStore.user.Role) !== -1) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
     const humanize = (indate) => {
       const es = moment(indate).locale('es');
       // moment.lang('es',{ago:'hace'});
@@ -412,6 +475,7 @@ export default defineComponent({
     const generarTemplateList = async (tId, show) => {
       try {
         let tempItems = [];
+        generalTemplate = [];
         if (show === 2) {
           let result = await supabase.rpc('gettemplatetoexel', {
             idtemplate: tId,
@@ -423,15 +487,15 @@ export default defineComponent({
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
                 if (tempItems[i].item === parseInt(x.item_id)) {
-                  generalTemplate.value.push({
+                  generalTemplate.push({
                     zona: tempItems[i].zone,
                     subzona: tempItems[i].subzone,
                     id: x.item_id,
                     producto: x.item_descripcion,
                     tipo: obtenerTipo(x.item_prefijo),
                     unidadMedida: x.unidadmedidainsumo_descripcion,
-                    stockActual: 0,
-                    stockContado: tempItems[i].qty ? tempItems[i].qty : '',
+                    stockActual: x.cantidad,
+                    stockContado: tempItems[i].qty ? tempItems[i].qty : 0,
                   });
                 }
               }
@@ -566,66 +630,6 @@ export default defineComponent({
         handleInventory.value = 'new';
       } catch (error) {
         console.log(error);
-      }
-    };
-
-    const subirExcel = async () => {
-      try {
-        //const data2 = files.value //document.getElementById('archivoExcel') as HTMLInputElement | null;
-        await readXlsFile(files.value, { schema }).then(({ rows, errors }) => {
-          // `errors` list items have shape: `{ row, column, error, reason?, value?, type? }`.
-          errors.length === 0;
-          jsonExcel.value = rows;
-          // rows === [{
-          //     date: new Date(2018, 2, 24),
-          //     numberOfStudents: 10,
-          //     course: {
-          //     isFree: true,
-          //     title: 'Chemistry'
-          //     },
-          //     contact: '+11234567890',
-          //     status: 'SCHEDULED'
-          // }]
-        });
-        //  jsonExcel.value = await readXlsFile(files.value, { schema })
-        // console.log('devolver el excel', jsonExcel.value);
-
-        verificarExcel(jsonExcel.value);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    function getDifference<T>(a: T[], b: T[]): T[] {
-      return a.filter((element) => {
-        return !b.includes(element);
-      });
-    }
-
-    const verificarExcel = async (data: []) => {
-      let info = [];
-      let containsAll: [];
-      const params = {
-        select: 'IdRest',
-      };
-      const resultAvatar = await Verify.findItem(params);
-      if (resultAvatar.success === 1) {
-        items.value = resultAvatar.originalResponse.body;
-
-        info = data.map((x: any) => {
-          let index = -1;
-          for (let i = 0, len = items.value.length; i < len; i++) {
-            if (items.value[i].IdRest === parseInt(x.IdRest)) {
-              index = i;
-              break;
-            }
-          }
-          if (index === -1) {
-            valor.value.push(x);
-          }
-        });
-
-        //console.log('la diff', valor.value);
       }
     };
 
@@ -1818,7 +1822,7 @@ export default defineComponent({
       await generarTemplateList(data.row.id, 2);
       // console.log('output->generalList.value', generalTemplate.value);
 
-      const result = generalTemplate.value.reduce((acc, curr) => {
+      const result = generalTemplate.reduce((acc, curr) => {
         acc[curr.zona] = acc[curr.zona] || [];
         acc[curr.zona].push({ ident: curr });
         return acc;
@@ -1907,7 +1911,7 @@ export default defineComponent({
 
       Object.entries(result).forEach(([key, value]) => {
         const heading = [row10];
-        generalTemplate.value.forEach((x) => {
+        generalTemplate.forEach((x) => {
           if (key === x.zona) {
             heading.push([
               {
@@ -2005,6 +2009,246 @@ export default defineComponent({
       );
     };
 
+    const CompareList = async (tId) => {
+      try {
+        // console.log('storeid', props.storeId);
+        const params = {
+          store: parseInt(storeId.value.toString()),
+          dateInv: moment(dateInventory.value).format(
+            'YYYY-MM-DD' + '%20' + '23:00:00'
+          ),
+          select: '*',
+        };
+        //  console.log('output->params', params);
+        if (compareRestList.length === 0) {
+          for (let i = 0; i < options.value.length; i++) {
+            const restResultItem = await Verify.getRestaurantItems(
+              params,
+              optionsTipo.value[i].dbVal
+            );
+            if (restResultItem.success === 1) {
+              const restModel = restResultItem.originalResponse.body.data;
+              //   console.log('rstmodel' + i, restModel);
+              if (restModel.length > 0 && restModel) {
+                restModel.forEach((x) => {
+                  compareRestList.push(x);
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.log('mark:EDDA40AD3C64', error);
+      }
+    };
+
+    const verify = async (tId, show) => {
+      try {
+        compareRestList = [];
+        $q.loading.show();
+        await CompareList(tId);
+        $q.loading.hide();
+        try {
+          let duplicado = [];
+          if (show === 2) {
+            let result = await supabase.rpc('gettemplatetoexel', {
+              idtemplate: tId,
+            });
+            if (result.status === 200) {
+              duplicado = result.data;
+              const tempItems = duplicado.reduce((acumulador, valorActual) => {
+                const elementoYaExiste = acumulador.find(
+                  (elemento) => elemento.item === valorActual.item
+                );
+                if (elementoYaExiste) {
+                  return acumulador.map((elemento) => {
+                    if (elemento.item === valorActual.item) {
+                      return {
+                        ...elemento,
+                        qty: elemento.qty
+                          ? parseFloat(elemento.qty) +
+                            parseFloat(valorActual.qty)
+                          : 0,
+                      };
+                    }
+
+                    return elemento;
+                  });
+                }
+
+                return [...acumulador, valorActual];
+              }, []);
+              //    console.log(tempItems, 'temp');
+              //    console.log('comp', compareRestList);
+              compareRestList.map((x: any) => {
+                for (let i = 0, len = tempItems.length; i < len; i++) {
+                  if (tempItems[i].item === parseInt(x.item_id)) {
+                    generalTemplate.push({
+                      zona: tempItems[i].zone,
+                      subzona: tempItems[i].subzone,
+                      id: x.item_id,
+                      producto: x.item_descripcion,
+                      tipo: obtenerTipo(x.item_prefijo),
+                      unidadMedida: x.unidadmedidainsumo_descripcion,
+                      stockActual: x.cantidad,
+                      stockContado: tempItems[i].qty ? tempItems[i].qty : 0,
+                    });
+                  }
+                }
+              });
+            } else {
+              console.log(
+                result.error ? result.error : 'response' + result.statusText
+              );
+            }
+          }
+        } catch (error) {
+          console.log('mark:EDDA40AD3C64', error);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const createTemplateManager = async (data) => {
+      generalList = [];
+
+      $q.loading.show();
+      //await generarLista(2);
+      await verify(data.row.id, 2);
+      // console.log('output->generalList.value', generalTemplate.value);
+
+      const result = generalTemplate.reduce((acc, curr) => {
+        acc[curr.zona] = acc[curr.zona] || [];
+        acc[curr.zona].push({ ident: curr });
+        return acc;
+      }, {});
+
+      const wb = XLSX.utils.book_new();
+
+      let row10 = [
+        {
+          v: 'Zona',
+          t: 's',
+          s: '',
+        },
+
+        {
+          v: 'subZona',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Id',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Tipo',
+          t: 's',
+          s: '',
+        },
+
+        {
+          v: 'Producto',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Unidad',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Stock',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Cantidad',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Diff',
+          t: 's',
+          s: '',
+        },
+      ];
+
+      Object.entries(result).forEach(([key, value]) => {
+        const heading = [row10];
+        generalTemplate.forEach((x) => {
+          if (key === x.zona) {
+            heading.push([
+              {
+                v: x.zona,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.subzona,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.id,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.tipo,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.producto,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.unidadMedida,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.stockActual,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.stockContado,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.stockActual - x.stockContado,
+                t: 's',
+                s: '',
+              },
+            ]);
+          }
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(heading);
+
+        if (!ws['!merges']) ws['!merges'] = [];
+
+        $q.loading.hide();
+
+        XLSX.utils.book_append_sheet(wb, ws, key);
+      });
+
+      // STEP 4: Write Excel file to browser
+      XLSX.writeFile(wb, 'Template.xlsx');
+
+      // eslint-disable-next-line quotes
+      console.log(
+        // eslint-disable-next-line quotes
+        `\n--------------------==~==~==~==[ ...DEMO COMPLETE ]==~==~==~==--------------------\n\n`
+      );
+    };
+
     return {
       columns,
       rows,
@@ -2022,6 +2266,9 @@ export default defineComponent({
       dato: ref(false),
       showInventory,
       idTemplate,
+      permiseAll,
+      permiseAdmin,
+      permiseManager,
       editRow,
       onCloseCreate,
       onCreateInventory,
@@ -2029,6 +2276,8 @@ export default defineComponent({
       onSearch,
       setTemplate,
       createTemplate,
+      havePermise,
+      createTemplateManager,
       myLocale: {
         /* starting with Sunday */
         days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
