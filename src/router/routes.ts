@@ -60,6 +60,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('src/pages/UserRole.vue'),
         meta: { authOnly: true },
       },
+      {
+        path: '/precioxcanal',
+        name: 'precioxcanal',
+        component: () => import('src/pages/ItemPivot.vue'),
+        meta: { authOnly: true },
+      },
     ],
   },
 

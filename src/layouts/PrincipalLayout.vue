@@ -169,11 +169,15 @@ import {
 } from '@vueauth/core';
 import useSupabase from '../boot/supabase';
 import { useUserStore } from '../stores/roles';
+import { useitemsTemplateStore } from '../stores/itemsTemplate';
+import { useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
 
 const { user } = useAuthState();
 const { identity } = useIdentityPasswordLogin();
 const { supabase } = useSupabase();
 //console.log('identity', identity)
+const $q = useQuasar();
 const leftDrawerOpen = ref(false);
 const search = ref('');
 const showAdvanced = ref(false);
@@ -184,6 +188,8 @@ const excludeWords = ref('');
 const byWebsite = ref('');
 const byDate = ref('Any time');
 const userStore = useUserStore();
+const router = useRouter();
+const useItems = useitemsTemplateStore();
 const permiseRole = 'SuperAdmin';
 onMounted(async () => {
   let role = await supabase
@@ -254,24 +260,35 @@ const links1 = ref([
     text: 'Escritorio',
     route: '/dashboard',
     permise: 'SuperAdmin,Administradores,Controller,Usuarios',
+    //click: '',
   },
   {
     icon: 'fas fa-dolly-flatbed',
     text: 'Plantilla de Inventario',
     route: '/managerinventorytemplate',
     permise: 'SuperAdmin,Controller',
+    //click: '',
   },
   {
     icon: 'fas fa-check-double',
     text: 'Inventario Físico',
     route: '/managerinventory',
     permise: 'SuperAdmin,Administradores,Controller,Usuarios',
+    //click: '',
   },
   {
     icon: 'fas fa-user-tag',
     text: 'Usuario Role',
     route: '/userrole',
     permise: 'SuperAdmin',
+    //click: '',
+  },
+  {
+    icon: 'fas fa-user-tag',
+    text: 'Precios x Canal',
+    route: '/precioxcanal',
+    permise: 'SuperAdmin,Controller',
+    //click: 'generatePivot()',
   },
   // { icon: 'settings', text: 'Generar Inventario', route: '/managerinventory' }
 ]);

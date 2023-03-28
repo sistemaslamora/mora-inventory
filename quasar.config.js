@@ -83,7 +83,10 @@ module.exports = configure(function (ctx) {
 
       distDir: ctx.mode.spa ? 'public' : null,
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf, { isClient, isServer }) {
+        viteConf.resolve.alias['devextreme/ui'] = 'devextreme/esm/ui';
+        ovrerlay = false;
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
