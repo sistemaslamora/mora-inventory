@@ -85,7 +85,7 @@ export default {
         //   info[0].preciolocalproducto_precio
         // );
       } else {
-        recursiva(canal);
+        return null;
       }
     };
 
@@ -112,20 +112,24 @@ export default {
       const output = [];
       for (let i = 0; i < canales.length; i++) {
         const info = await recursiva(canales[i].id);
-        console.log('output->canales[i].id', canales[i].id);
-        console.log('output->info', info);
-        const name = canales[i].name;
-        for (let j = 0; j < info.length - 1; j++) {
-          output.push({
-            Producto_Id: info[j].producto_id,
-            Producto: info[j].producto_descripcion,
-            Precio:
-              info[j].preciolocalproducto_precio === '-'
-                ? '-1'
-                : info[j].preciolocalproducto_precio,
-            Local: info[j].local_descripcion,
-            Canal: name,
-          });
+        if (info) {
+          console.log('output->canales[i].id', canales[i].id);
+          console.log('output->info', info);
+          const name = canales[i].name;
+          for (let j = 0; j < info.length - 1; j++) {
+            output.push({
+              Producto_Id: info[j].producto_id,
+              Producto: info[j].producto_descripcion,
+              Precio:
+                info[j].preciolocalproducto_precio === '-'
+                  ? '-1'
+                  : info[j].preciolocalproducto_precio,
+              Local: info[j].local_descripcion,
+              Canal: name,
+            });
+          }
+        } else {
+          i--;
         }
       }
 
