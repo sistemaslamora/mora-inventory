@@ -131,7 +131,7 @@ export default {
             });
           }
         } else {
-          if (count < 4) i--;
+          if (count < 10) i--;
           else console.log('output->error con este canal', canales[i].name);
         }
       }
