@@ -455,7 +455,7 @@ export default class ItemService {
 
   static getItemsOfSale = async (data) => {
     const baseUrl: string | undefined =
-      'http://lamora.restaurant.pe/restaurant/m/rest/almacen/obtenerListaPreciosPorLocal';
+      'https://lamora.restaurant.pe/restaurant/m/rest/almacen/obtenerListaPreciosPorLocal';
 
     const result = {
       success: 0,
