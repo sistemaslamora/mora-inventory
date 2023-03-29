@@ -128,8 +128,6 @@ export default {
               Canal: name,
             });
           }
-        } else {
-          i--;
         }
       }
 
