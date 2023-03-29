@@ -109,9 +109,11 @@ export default {
         { id: 1009, name: 'Salon' },
         { id: 1011, name: 'Rappi triplemania' },
       ];
+      let count = 0;
       const output = [];
       for (let i = 0; i < canales.length; i++) {
         const info = await recursiva(canales[i].id);
+        count++;
         if (info) {
           console.log('output->canales[i].id', canales[i].id);
           console.log('output->info', info);
@@ -128,6 +130,9 @@ export default {
               Canal: name,
             });
           }
+        } else {
+          if (count < 4) i--;
+          else console.log('output->error con este canal', canales[i].name);
         }
       }
 
