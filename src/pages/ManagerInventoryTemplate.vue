@@ -1,9 +1,6 @@
 <template>
   <div class="q-pa-md q-gutter-y-sm">
-    <q-toolbar
-      class="bg-primary q-py-sm text-white"
-      style="padding-top: 1rem;"
-    >
+    <q-toolbar class="bg-primary q-py-sm text-white" style="padding-top: 1rem">
       <q-btn
         stack
         flat
@@ -11,11 +8,10 @@
         no-caps
         class="q-mx-sm"
         label="Nuevo"
-        :to="{name:'handleinventorytemplate', params: {show: '0'}}"
+        :to="{ name: 'handleinventorytemplate', params: { show: '0' } }"
         icon="fa-solid fa-file-circle-plus"
-        style="line-height: 1.5rem;"
+        style="line-height: 1.5rem"
       >
-
       </q-btn>
 
       <q-btn
@@ -26,9 +22,8 @@
         class="q-mx-sm"
         label="Ver Todos"
         icon="fas fa-folder-tree"
-        style="line-height: 1.5rem;"
+        style="line-height: 1.5rem"
       >
-
       </q-btn>
     </q-toolbar>
 
@@ -40,14 +35,15 @@
         :visible-columns="visibleColumns"
         row-key="Descripcion"
         dense
-      > <template v-slot:header="props">
+      >
+        <template v-slot:header="props">
           <q-tr :props="props">
             <q-th
               v-for="col in props.cols"
               :key="col.name"
               :props="props"
               class="text-italic"
-              style="color: #d4aa70; font-size: 1rem;"
+              style="color: #d4aa70; font-size: 1rem"
             >
               {{ col.label }}
             </q-th>
@@ -76,7 +72,6 @@
       </q-table>
     </div>
   </div>
-
 </template>
 
 
@@ -87,11 +82,13 @@ import Verify from '../common/service/verify';
 import { useRouter } from 'vue-router';
 import moment from 'moment';
 import 'moment/locale/es';
+import useSupabase from '../boot/supabase';
+
 export default defineComponent({
   setup() {
     const $q = useQuasar();
     const items = ref([]);
-
+    const { supabase } = useSupabase();
     const show = ref('');
     const router = useRouter();
     // const showScreen = ref(false);
@@ -135,7 +132,9 @@ export default defineComponent({
       //  moment.locale('es');
       return es.fromNow();
     };
-    onMounted(async () => {
+
+    const cargarTemplates = async () => {
+      rows.value = [];
       const params = {
         select: '*',
       };
@@ -146,6 +145,9 @@ export default defineComponent({
           rows.value.push(x);
         });
       }
+    };
+    onMounted(async () => {
+      await cargarTemplates();
     });
 
     watchEffect(() => {
@@ -166,6 +168,36 @@ export default defineComponent({
       });
     };
 
+    const deleteRow = async (data) => {
+      try {
+        let result = await supabase
+          .from('bizTemplateZone')
+          .delete()
+          .eq('PLI_Id', data.row.Id);
+        if (result.status === 200) {
+          let result2 = await supabase
+            .from('bizInventoryTemplate')
+            .delete()
+            .eq('Id', data.row.Id);
+          $q.notify({
+            position: 'top',
+            type: 'positive',
+            message: `Se ha eliminado la plantilla ${data.row.Description}`,
+          });
+          await cargarTemplates();
+        }
+        if (result.error) {
+          $q.notify({
+            position: 'top',
+            type: 'negative',
+            message: `Hubo un error al tratar de eliminar ${data.row.Description}`,
+          });
+        }
+      } catch (error) {
+        console.log('output->error', error);
+      }
+    };
+
     return {
       columns,
       rows,
@@ -173,6 +205,7 @@ export default defineComponent({
       selected: ref([]),
       dato: ref(false),
       editRow,
+      deleteRow,
       show,
     };
   },

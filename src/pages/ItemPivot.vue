@@ -103,10 +103,9 @@ export default {
         { id: 1002, name: 'Justo sopitas' },
         { id: 1003, name: 'Justo lamora' },
         { id: 1004, name: 'Justo triplemania' },
-        { id: 1006, name: 'Mora' },
-        { id: 1007, name: 'Sopitas' },
-        { id: 1008, name: 'Barra' },
-        { id: 1009, name: 'Salon' },
+        { id: 1006, name: 'Call Center Mora' },
+        { id: 1007, name: 'Call Center Sopitas' },
+        { id: 1008, name: 'Barra Anticipada' },
         { id: 1011, name: 'Rappi triplemania' },
       ];
       let count = 0;
@@ -122,6 +121,7 @@ export default {
             output.push({
               Producto_Id: info[j].producto_id,
               Producto: info[j].producto_descripcion,
+              Categoria: info[j].categoria_descripcion,
               Precio:
                 info[j].preciolocalproducto_precio === '-'
                   ? '-1'

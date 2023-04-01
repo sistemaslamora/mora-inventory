@@ -110,16 +110,19 @@
                 <template v-slot:hint> Obligatorio </template>
               </q-input>
             </div>
+
             <div class="q-pa-md">
-              <q-tree
-                :nodes="simple"
-                accordion
-                node-key="idSubZone"
-                label-key="label"
-                selected-color="primary"
-                v-model:selected="selected"
-                @update:selected="updateSelected"
-              />
+              <q-scroll-area style="height: 300px; max-width: 300px">
+                <q-tree
+                  :nodes="simple"
+                  accordion
+                  node-key="idSubZone"
+                  label-key="label"
+                  selected-color="primary"
+                  v-model:selected="selected"
+                  @update:selected="updateSelected"
+                />
+              </q-scroll-area>
             </div>
           </template>
 
