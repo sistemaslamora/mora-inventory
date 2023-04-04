@@ -417,6 +417,7 @@ export default defineComponent({
                 params,
                 options.value[i].dbVal
               );
+              //  console.log(restResultItem);
               if (restResultItem.success === 1) {
                 listValue = true;
                 const restModel = restResultItem.originalResponse.body.data;
@@ -439,9 +440,21 @@ export default defineComponent({
       }
     };
 
+    const callData = async () => {
+      try {
+        dualList.value.loadingList(false, 1);
+        await dualList.value?.generarTempLista(props.templateId, '2');
+
+        //  console.log('respose', response.value);
+      } catch (error) {
+        console.log('mark:9C02C7578EEE', error);
+      }
+    };
+
     onMounted(async () => {
       try {
         dualList.value.loadingList(true, props.show);
+        await dualList.value?.clearList();
         await generarLista('1');
         await dualList.value?.generarLista(mainRestList.value);
         if (props.show === '0') {
@@ -768,6 +781,7 @@ export default defineComponent({
               type: 'positive',
               message: `Se han guardado los cambios en la plantila ${modelDescription.value}`,
             });
+            await callData();
             // router.push('/managerinventorytemplate');
           }
         } else {

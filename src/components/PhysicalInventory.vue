@@ -84,6 +84,10 @@
                       :label="breadcumData.SubZone"
                       icon="fa-solid fa-location-dot"
                     />
+                    <q-breadcrumbs-el
+                      :label="breadcumData.Cant"
+                      icon="fas fa-stopwatch-20"
+                    />
                   </q-breadcrumbs>
                 </div>
                 <div>
@@ -302,6 +306,8 @@ export default {
         rowsTemp.value = generalList.value.filter(
           (x) => x.idSubZone === treeData.value.idSubZone
         );
+        breadcumData.value['Cant'] = rowsTemp.value.length.toString();
+        // console.log('output->breadcumData.value', breadcumData.value);
         swapHotData();
       }
     );
@@ -480,6 +486,10 @@ export default {
             rowsTemp.value = generalList.value.filter(
               (x) => x.idSubZone === treeData.value.idSubZone
             );
+            breadcumData.value['Cant'] =
+              rowsTemp.value.length === 0
+                ? ''
+                : rowsTemp.value.length.toString();
             //  console.log(rowsTemp.value, 'rowstemp');
             swapHotData();
             // context.emit('onUpdate', generalList.value);
@@ -970,7 +980,11 @@ export default {
 
         idTemplate.value = props.templateId;
         modelDescription.value = props.description;
-        jsonStorage.value = $q.localStorage.getItem('mainList');
+
+        jsonStorage.value =
+          props.handleInventory === 'edit'
+            ? $q.localStorage.getItem('mainList')
+            : null;
         if (!jsonStorage.value) {
           $q.loading.show();
           await generarLista('1');

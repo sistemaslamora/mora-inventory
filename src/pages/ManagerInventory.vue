@@ -161,6 +161,19 @@
                 >Plantillas en excel Controller</q-tooltip
               >
             </q-btn>
+            <q-btn
+              v-if="havePermise(permiseManager)"
+              dense
+              round
+              flat
+              color="grey"
+              @click="deleteRow(props)"
+              icon="fas fa-trash-alt"
+            >
+              <q-tooltip class="bg-dark"
+                >Plantillas en excel Controller</q-tooltip
+              >
+            </q-btn>
           </q-td>
         </template>
       </q-table>
@@ -447,7 +460,7 @@ export default defineComponent({
               }
             }
 
-            //  $q.localStorage.set('mainList', mainRestList.value);
+            $q.localStorage.set('mainList', mainRestList.value);
 
             return listValue;
           }
@@ -2246,6 +2259,36 @@ export default defineComponent({
       );
     };
 
+    const deleteRow = async (data) => {
+      try {
+        let result = await supabase
+          .from('bizphysicalinventoryzone')
+          .delete()
+          .eq('pi_id', data.row.id);
+        if (result.status === 200) {
+          let result2 = await supabase
+            .from('bizphysicalinventory')
+            .delete()
+            .eq('id', data.row.id);
+          $q.notify({
+            position: 'top',
+            type: 'positive',
+            message: `Se ha eliminado la plantilla ${data.row.Description}`,
+          });
+          await onSearch();
+        }
+        if (result.error) {
+          $q.notify({
+            position: 'top',
+            type: 'negative',
+            message: `Hubo un error al tratar de eliminar ${data.row.Description}`,
+          });
+        }
+      } catch (error) {
+        console.log('output->error', error);
+      }
+    };
+
     return {
       columns,
       rows,
@@ -2275,6 +2318,7 @@ export default defineComponent({
       createTemplate,
       havePermise,
       createTemplateManager,
+      deleteRow,
       myLocale: {
         /* starting with Sunday */
         days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),

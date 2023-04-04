@@ -108,7 +108,65 @@
         <template v-slot:top>
           <!-- <q-btn color="primary" :disable="loading" label="Add row" @click="addRow" />
                     <q-btn class="q-ml-sm" color="primary" :disable="loading" label="Remove row" @click="removeRow" />-->
-          <div class="row justify-start">
+          <div class="row no-wrap justify-between">
+            <div>
+              <q-file
+                :model-value="files"
+                @update:model-value="updateFiles"
+                label="Xls"
+                dark
+                dense
+                standout
+                class="q-ml-sm"
+                :clearable="!isUploading"
+                style="max-width: 200px"
+              >
+                <template v-slot:file="{ index, file }">
+                  <q-chip
+                    class="full-width q-my-xs text-italic text-black"
+                    :removable="
+                      isUploading && uploadProgress[index].percent < 1
+                    "
+                    square
+                    @remove="cancelFile(index)"
+                  >
+                    <q-linear-progress
+                      class="absolute-full full-height"
+                      :value="uploadProgress[index].percent"
+                      :color="uploadProgress[index].color"
+                      track-color="grey-2"
+                    />
+
+                    <q-avatar>
+                      <q-icon :name="uploadProgress[index].icon" />
+                    </q-avatar>
+
+                    <div
+                      class="ellipsis relative-position text-italic text-black"
+                    >
+                      {{ file.name }}
+                    </div>
+
+                    <q-tooltip>
+                      {{ file.name }}
+                    </q-tooltip>
+                  </q-chip>
+                </template>
+
+                <template v-slot:after v-if="canUpload">
+                  <q-btn
+                    color="secondary"
+                    dense
+                    icon="cloud_upload"
+                    round
+                    @click="upload"
+                    :disable="!canUpload"
+                    :loading="isUploading"
+                  />
+                </template>
+              </q-file>
+            </div>
+
             <div>
               <q-input dark dense standout v-model="filterTemp" class="q-ml-sm">
                 <template v-slot:append>
@@ -130,8 +188,9 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import Verify from '../common/service/verify';
+import readXlsFile from 'read-excel-file';
 
 const columnsDb = [
   {
@@ -197,6 +256,24 @@ export default {
     const generalList = ref([]);
     const mainRestList = ref([]);
     const tipo = ref(null);
+    const jsonExcel = ref();
+    const files = ref(null);
+    const schema = {
+      Codigo: {
+        // JSON object property name.
+        prop: 'codigo',
+        type: String,
+      },
+      Insumo: {
+        // JSON object property name.
+        prop: 'insumo',
+        type: String,
+      },
+    };
+    const map = {
+      codigo: 'codigo',
+      insumo: 'insumo',
+    };
 
     const options = ref([
       {
@@ -241,6 +318,135 @@ export default {
       } catch (error) {
         console.log('mark:EDDA40AD3C64', error);
       }
+    };
+
+    const uploadProgress = ref([]);
+    const uploading = ref(null);
+
+    function cleanUp() {
+      clearTimeout(uploading.value);
+    }
+
+    function updateUploadProgress() {
+      let done = true;
+
+      uploadProgress.value = uploadProgress.value.map((progress) => {
+        if (progress.percent === 1 || progress.error === true) {
+          return progress;
+        }
+
+        const percent = Math.min(1, progress.percent + Math.random() / 0.1);
+        const error = false; //percent < 1 && Math.random() > 0.95;
+
+        if (error === false && percent < 1 && done === true) {
+          done = false;
+        }
+
+        return {
+          ...progress,
+          error,
+          color: 'green-2',
+          percent,
+        };
+      });
+
+      uploading.value =
+        done !== true ? setTimeout(updateUploadProgress, 300) : null;
+    }
+
+    // onBeforeUnmount(cleanUp)
+    const cancelFile = (index) => {
+      uploadProgress[index] = {
+        ...uploadProgress[index],
+        error: true,
+        color: 'orange-2',
+      };
+    };
+
+    const updateFiles = (newFiles) => {
+      files.value = newFiles;
+      console;
+      uploadProgress.value = [
+        {
+          error: false,
+          color: 'green-2',
+          percent: 0,
+          // icon:
+          //   newFiles.type.indexOf('video/') === 0
+          //     ? 'movie'
+          //     : newFiles.type.indexOf('image/') === 0
+          //     ? 'photo'
+          //     : newFiles.type.indexOf('audio/') === 0
+          //     ? 'audiotrack'
+          //     : 'insert_drive_newFiles',
+        },
+      ];
+    };
+
+    const upload = async () => {
+      cleanUp();
+
+      const allDone = uploadProgress.value.every(
+        (progress) => progress.percent === 1
+      );
+
+      uploadProgress.value = uploadProgress.value.map((progress) => ({
+        ...progress,
+        error: false,
+        color: 'green-2',
+        percent: allDone === true ? 0 : progress.percent,
+      }));
+
+      updateUploadProgress();
+      await subirExcel();
+    };
+
+    const subirExcel = async () => {
+      try {
+        //const data2 = files.value //document.getElementById('archivoExcel') as HTMLInputElement | null;
+        // await readXlsFile(files.value, { schema }).then(({ rows, errors }) => {
+        // `errors` list items have shape: `{ row, column, error, reason?, value?, type? }`.
+        //     errors.length === 0;
+        //     jsonExcel.value = rows;
+
+        // rows === [{
+        //     date: new Date(2018, 2, 24),
+        //     numberOfStudents: 10,
+        //     course: {
+        //     isFree: true,
+        //     title: 'Chemistry'
+        //     },
+        //     contact: '+11234567890',
+        //     status: 'SCHEDULED'
+        // }]
+        // });
+        const template = props.selected;
+        jsonExcel.value = await readXlsFile(files.value, { map });
+        jsonExcel.value.rows.forEach((element) => {
+          generalList.value.push({
+            idTemplate: template.idTemplate,
+            idZone: template.idZone,
+            idSubZone: template.idSubZone,
+            item_id: element.codigo,
+            item_descripcion: element.insumo,
+          });
+          files.value = null;
+          uploadProgress.value = [];
+          uploading.value = null;
+        });
+
+        rowsTemp.value = generalList.value.filter(
+          (x) => x.idSubZone === props.selected.idSubZone
+        );
+
+        // verificarExcel(jsonExcel.value);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const clearList = () => {
+      rowsTemp.value = [];
     };
 
     const loadingList = (value, show) => {
@@ -294,6 +500,7 @@ export default {
     const generarTempLista = async (params, show) => {
       try {
         let tempItems = [];
+        generalList.value = [];
         if (show === '2') {
           rowsTemp.value = [];
           const filter = {
@@ -362,7 +569,19 @@ export default {
         if (i !== -1) {
           rowsTemp.value.splice(i, 1);
         }
-        context.emit('onUpdate', rowsTemp.value);
+
+        generalList.value = generalList.value.filter(
+          (item) => item.item_id !== row.item_id
+        );
+
+        //    let j = generalList.value.findIndex(
+        //   (data) => data.item_id === row.item_id
+        // );
+
+        // if (j !== -1) {
+        //   generalList.value.splice(i, 1);
+        // }
+        context.emit('onUpdate', generalList.value);
       } catch (error) {
         console.log('mark:04AD35E5A5CF', error);
       }
@@ -451,6 +670,16 @@ export default {
       generarTempLista,
       generarImportLista,
       loadingList,
+      clearList,
+      subirExcel,
+      uploadProgress,
+      uploading,
+      cancelFile,
+      updateFiles,
+      upload,
+      files,
+      isUploading: computed(() => uploading.value !== null),
+      canUpload: computed(() => files.value !== null),
     };
   },
 };
@@ -467,7 +696,7 @@ export default {
     /* bg color is important for th; just specify one */
     background-color: #811715;
     color: aliceblue;
-    justify-content: flex-end;
+    justify-content: center;
     flex-wrap: nowrap;
   }
   thead tr th {
@@ -484,7 +713,9 @@ export default {
     top: 48px;
   }
 }
-
+.q-table--dense .q-table__top {
+  padding: 0.2rem 0.5rem;
+}
 .header-background {
   background-color: #157f81;
 }
