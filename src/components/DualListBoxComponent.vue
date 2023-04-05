@@ -508,38 +508,62 @@ export default {
             select: '*',
           };
           //NOTE - hay que enviar el tipo de articulos(insumo = 1, producto = 2, recetas = 3, descartable= 6)
-          //   console.log('main2', mainRestList.value);
+          // Cache the result of Verify.getItemsTemplate(filter)
           const templateResultItem = await Verify.getItemsTemplate(filter);
           if (templateResultItem.success === 1) {
-            tempItems = templateResultItem.originalResponse.body;
-            //   console.log('temps', tempItems);
-          } else {
-          }
-          mainRestList.value.map((x: any) => {
-            let index = -1;
-            for (let i = 0, len = tempItems.length; i < len; i++) {
-              if (tempItems[i].item === parseInt(x.item_id)) {
-                generalList.value.push({
-                  idTemplate: tempItems[i].pls_plz_pli_id,
-                  idZone: tempItems[i].pls_plz_id,
-                  idSubZone: tempItems[i].pls_id,
+            const tempItems = templateResultItem.originalResponse.body;
+            const itemsByItemId = {}; // Convert tempItems to an object with item_id keys
+            tempItems.forEach((item) => (itemsByItemId[item.item] = item));
+
+            // Use array methods to filter and find relevant items
+            generalList.value = mainRestList.value
+              .filter((x) => itemsByItemId[x.item_id]) // Filter out irrelevant items
+              .map((x) => {
+                const item = itemsByItemId[x.item_id];
+                return {
+                  idTemplate: item.pls_plz_pli_id,
+                  idZone: item.pls_plz_id,
+                  idSubZone: item.pls_id,
                   item_id: x.item_id,
                   item_descripcion: x.item_descripcion,
-                });
-                // let j = rowsDb.value.findIndex(
-                //   (data) => data.item_id === x.item_id
-                // );
+                };
+              });
+          }
+          rowsTemp.value = generalList.value.filter(
+            (x) => x.idSubZone === props.selected.idSubZone
+          );
+          //   console.log('main2', mainRestList.value);
+          // const templateResultItem = await Verify.getItemsTemplate(filter);
+          // if (templateResultItem.success === 1) {
+          //   tempItems = templateResultItem.originalResponse.body;
+          //   //   console.log('temps', tempItems);
+          // } else {
+          // }
+          // mainRestList.value.map((x: any) => {
+          //   let index = -1;
+          //   for (let i = 0, len = tempItems.length; i < len; i++) {
+          //     if (tempItems[i].item === parseInt(x.item_id)) {
+          //       generalList.value.push({
+          //         idTemplate: tempItems[i].pls_plz_pli_id,
+          //         idZone: tempItems[i].pls_plz_id,
+          //         idSubZone: tempItems[i].pls_id,
+          //         item_id: x.item_id,
+          //         item_descripcion: x.item_descripcion,
+          //       });
+          //       // let j = rowsDb.value.findIndex(
+          //       //   (data) => data.item_id === x.item_id
+          //       // );
 
-                // if (j !== -1) {
-                //   rowsDb.value.splice(j, 1);
-                // }
-              }
-              rowsTemp.value = generalList.value.filter(
-                (x) => x.idSubZone === props.selected.idSubZone
-              );
-            }
-          });
-          // console.log('generarl', generalList.value);
+          //       // if (j !== -1) {
+          //       //   rowsDb.value.splice(j, 1);
+          //       // }
+          //     }
+          //     rowsTemp.value = generalList.value.filter(
+          //       (x) => x.idSubZone === props.selected.idSubZone
+          //     );
+          //   }
+          // });
+          // // console.log('generarl', generalList.value);
           loading2.value = false;
           context.emit('onUpdate', generalList.value);
         }

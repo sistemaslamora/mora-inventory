@@ -170,9 +170,7 @@
               @click="deleteRow(props)"
               icon="fas fa-trash-alt"
             >
-              <q-tooltip class="bg-dark"
-                >Plantillas en excel Controller</q-tooltip
-              >
+              <q-tooltip class="bg-dark">Eliminar Plantilla</q-tooltip>
             </q-btn>
           </q-td>
         </template>
