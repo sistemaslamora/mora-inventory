@@ -581,30 +581,21 @@ export default defineComponent({
     const onSearch = async () => {
       try {
         rows.value = [];
-        let _date = moment(dateInventory.value).format('YYYY-MM-DD');
-        let { data: response, error } = await supabase
+
+        const _date = moment(dateInventory.value, 'YYYY-MM-DD').format(
+          'YYYY-MM-DD'
+        );
+        const storeFilter = tipo.value ? { store_id: tipo.value.value } : {};
+
+        const { data: responseData, error } = await supabase
           .from('bizphysicalinventory')
           .select('*')
-          // Filters
-          .eq('create', _date);
-        // console.log(response, 'responseCreate');
-        if (response) {
-          response.forEach((x) => {
-            rows.value.push(x);
-          });
+          .eq('create', _date)
+          .match(storeFilter);
+
+        if (responseData) {
+          rows.value = [...responseData];
         }
-        // const physical = await supabase.rpc('get_inventory_by_date', {
-        //   fecha: _date,
-        // });
-        // if (physical.status === 200) {
-        //   physical.data.forEach((x) => {
-        //     rows.value.push(x);
-        //   });
-        // } else {
-        //   console.log(
-        //     physical.error ? physical.error : 'result' + physical.statusText
-        //   );
-        // }
       } catch (error) {
         console.log(error);
       }

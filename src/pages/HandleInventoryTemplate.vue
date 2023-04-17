@@ -440,10 +440,10 @@ export default defineComponent({
       }
     };
 
-    const callData = async () => {
+    const callData = async (id) => {
       try {
         dualList.value.loadingList(false, 1);
-        await dualList.value?.generarTempLista(props.templateId, '2');
+        await dualList.value?.generarTempLista(id, '2');
 
         //  console.log('respose', response.value);
       } catch (error) {
@@ -737,23 +737,20 @@ export default defineComponent({
 
     const createItems = async (id) => {
       try {
-        let data = [];
-        listItems.value.forEach((element) => {
-          data.push({
-            pls_plz_pli_id: id,
-            pls_plz_id: element.idZone,
-            pls_id: element.idSubZone,
-            item: parseInt(element.item_id),
-          });
-        });
-        //  const template = await Verify.createInventoryTemplate(params);
+        const data = listItems.value.map((element) => ({
+          pls_plz_pli_id: id,
+          pls_plz_id: element.idZone,
+          pls_id: element.idSubZone,
+          item: parseInt(element.item_id),
+        }));
 
         const { error } = await supabase.from('biztemplateitem').insert(data);
         if (error) {
-          console.log(error);
+          throw new Error(error.message);
         }
       } catch (error) {
-        console.log('mark:E2D87765FE56', error);
+        console.error('mark:E2D87765FE56', error);
+        throw new Error('Error al crear los elementos.');
       }
     };
 
@@ -781,7 +778,7 @@ export default defineComponent({
               type: 'positive',
               message: `Se han guardado los cambios en la plantila ${modelDescription.value}`,
             });
-            await callData();
+            await callData(tId);
             // router.push('/managerinventorytemplate');
           }
         } else {
