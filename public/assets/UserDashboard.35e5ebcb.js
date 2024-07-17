@@ -1,1 +1,0 @@
-import{Q as e}from"./QPage.0b2f1573.js";import{k as a,l as t,m as s,x as r}from"./index.27345aab.js";const c=r("h3",{class:"text-weight-thin"}," prueba de actualizacion a ver ",-1),p={__name:"UserDashboard",setup(o){return(n,_)=>(a(),t(e,{padding:"",class:"flex flex-center text-center"},{default:s(()=>[c]),_:1}))}};export{p as default};
