@@ -1,7 +1,7 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/service-worker.js", "destination": "/service-worker.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
 
   "headers": [
@@ -33,18 +33,13 @@
     },
     {
       "source": "/:path*",
-      "has": [
-        {
-          "type": "query",
-          "key": "authorized"
-        }
-      ],
       "headers": [
         {
           "key": "x-authorized",
           "value": "true"
         }
-      ]
+      ],
+      "conditions": [{ "type": "query", "key": "authorized", "value": "true" }]
     }
   ]
 }
