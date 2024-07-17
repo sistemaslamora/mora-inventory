@@ -1,1 +1,0 @@
-import{y as s,c as o,h as t,z as n,i as u,bl as c}from"./index.cf0f49d2.js";var l=s({name:"QTr",props:{props:Object,noHover:Boolean},setup(r,{slots:e}){const a=o(()=>"q-tr"+(r.props===void 0||r.props.header===!0?"":" "+r.props.__trClass)+(r.noHover===!0?" q-tr--no-hover":""));return()=>t("tr",{class:a.value},n(e.default))}});function v(){return u(c)}export{l as Q,v as u};
