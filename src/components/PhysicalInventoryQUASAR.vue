@@ -474,7 +474,7 @@ export default {
 
     const CompareList = async () => {
       try {
-        console.log('storeid', props.storeId);
+        //    console.log('storeid', props.storeId);
         const params = {
           store: parseInt(props.storeId),
           dateInv: moment().format('YYYY-MM-DD' + '%20' + 'HH:mm:00'),
@@ -530,7 +530,7 @@ export default {
             .eq('pis_piz_pi_id', tId);
           if (result.status === 200) {
             tempItems = result.data;
-            console.log('temps', result);
+            //  console.log('temps', result);
             mainRestList.value.map((x: any) => {
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
@@ -1078,7 +1078,7 @@ export default {
     };
 
     const pressKey = (evt, row) => {
-      console.log('entro aqui');
+      // console.log('entro aqui');
       const currentIndex = tableRef.value.table.getRowIndex(
         tableRef.value.table.bodyElem.querySelector('.q-td--focused')
       );
@@ -1158,7 +1158,7 @@ export default {
       },
 
       onKey(evt) {
-        console.log(evt);
+        //  console.log(evt);
         // if (
         //   navigationActive.value !== true ||
         //   [13, 40].indexOf(evt.keyCode) === -1 ||

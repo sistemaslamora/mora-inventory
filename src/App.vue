@@ -3,50 +3,52 @@
 </template>
 
 <script setup>
-import { authenticateRoutes } from '@vueauth/quasar-ui-auth'
-import { useAuthenticatedRedirector, useUnauthenticatedRedirector } from '@vueauth/core'
-import { Loading } from 'quasar'
+import { authenticateRoutes } from '@vueauth/quasar-ui-auth';
+import {
+  useAuthenticatedRedirector,
+  useUnauthenticatedRedirector,
+} from '@vueauth/core';
+import { Loading } from 'quasar';
 import { useRouter } from 'vue-router';
-import { unref } from 'vue'
+import { unref } from 'vue';
 
-const router = useRouter()
+const router = useRouter();
 
-const authenticatedRedirector = useAuthenticatedRedirector()
-const unauthenticatedRedirector = useUnauthenticatedRedirector()
+const authenticatedRedirector = useAuthenticatedRedirector();
+const unauthenticatedRedirector = useUnauthenticatedRedirector();
 
-authenticatedRedirector.onChecked.value = () => Loading.hide()
-unauthenticatedRedirector.onChecked.value = () => Loading.hide()
+authenticatedRedirector.onChecked.value = () => Loading.hide();
+unauthenticatedRedirector.onChecked.value = () => Loading.hide();
 
 router.isReady().then(() => {
+<<<<<<< HEAD
   const route = unref(router.currentRoute)
   //console.log(route, 'route')
+=======
+  const route = unref(router.currentRoute);
+
+>>>>>>> upstream/main
   if (route.meta.authOnly) {
-    Loading.show()
-    unauthenticatedRedirector.execOnAuthStateEnsured()
-    next()
+    Loading.show();
+    unauthenticatedRedirector.execOnAuthStateEnsured();
+    next();
   }
 
   if (route.meta.unauthOnly) {
-    authenticatedRedirector.execOnAuthStateEnsured()
-
+    authenticatedRedirector.execOnAuthStateEnsured();
   }
-})
+});
 
 router.beforeEach((to, from) => {
-
   if (to.meta.authOnly) {
-    Loading.show()
-    unauthenticatedRedirector.execOnAuthStateEnsured()
-
+    Loading.show();
+    unauthenticatedRedirector.execOnAuthStateEnsured();
   }
 
   if (to.meta.unauthOnly) {
-    authenticatedRedirector.execOnAuthStateEnsured()
-
+    authenticatedRedirector.execOnAuthStateEnsured();
   }
+});
 
-
-})
-
-authenticateRoutes()
+authenticateRoutes();
 </script>

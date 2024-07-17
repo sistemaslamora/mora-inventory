@@ -2,6 +2,7 @@
   <div class="q-pa-md q-gutter-y-sm">
     <q-toolbar class="bg-primary q-py-sm text-white" style="padding-top: 1rem">
       <q-btn
+        v-if="havePermise(permiseAdmin)"
         stack
         flat
         size="12px"
@@ -12,6 +13,7 @@
         icon="fa-solid fa-file-circle-plus"
         style="line-height: 1.5rem"
       >
+        <q-tooltip class="bg-dark">Crear Inventario</q-tooltip>
       </q-btn>
 
       <!-- <q-btn
@@ -53,13 +55,8 @@
                     minimal
                     :locale="myLocale"
                   >
-                    <div class="row items-center justify-start">
-                      <q-btn
-                        v-close-popup
-                        label="Cerrar"
-                        color="primary"
-                        flat
-                      />
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Ok" color="primary" flat />
                     </div>
                   </q-date>
                 </q-popup-proxy>
@@ -91,6 +88,7 @@
         icon="fas fa-search"
         style="line-height: 1.5rem"
       >
+        <q-tooltip class="bg-dark">Buscar</q-tooltip>
       </q-btn>
     </q-toolbar>
 
@@ -125,23 +123,55 @@
               color="grey"
               @click="editRow(props)"
               icon="far fa-edit"
-            ></q-btn>
+            >
+              <q-tooltip class="bg-dark">Editar Inventario</q-tooltip>
+            </q-btn>
             <q-btn
+              v-if="havePermise(permiseAdmin)"
               dense
               round
               flat
               color="grey"
               @click="setTemplate(props)"
               icon="far fa-file-excel"
-            ></q-btn>
+            >
+              <q-tooltip class="bg-dark">Excel Para Restaurant</q-tooltip>
+            </q-btn>
             <q-btn
+              v-if="havePermise(permiseAdmin)"
               dense
               round
               flat
               color="grey"
               @click="createTemplate(props)"
-              icon="far fa-file-excel"
-            ></q-btn>
+              icon="fas fa-tools"
+            >
+              <q-tooltip class="bg-dark">Plantillas en excel</q-tooltip>
+            </q-btn>
+            <q-btn
+              v-if="havePermise(permiseManager)"
+              dense
+              round
+              flat
+              color="grey"
+              @click="createTemplateManager(props)"
+              icon="fas fa-user-ninja"
+            >
+              <q-tooltip class="bg-dark"
+                >Plantillas en excel Controller</q-tooltip
+              >
+            </q-btn>
+            <q-btn
+              v-if="havePermise(permiseManager)"
+              dense
+              round
+              flat
+              color="grey"
+              @click="deleteRow(props)"
+              icon="fas fa-trash-alt"
+            >
+              <q-tooltip class="bg-dark">Eliminar Plantilla</q-tooltip>
+            </q-btn>
           </q-td>
         </template>
       </q-table>
@@ -177,6 +207,8 @@ import PysicalInventory from '../components/PhysicalInventory.vue';
 import useSupabase from '../boot/supabase';
 import XLSX from 'xlsx-js-style';
 import readXlsFile from 'read-excel-file';
+import { useUserStore } from '../stores/roles';
+import { store } from 'quasar/wrappers';
 
 export default defineComponent({
   components: {
@@ -184,6 +216,7 @@ export default defineComponent({
     PysicalInventory,
   },
   setup() {
+    const userStore = useUserStore();
     const $q = useQuasar();
     // const items = ref([]);
     const tipo = ref(null);
@@ -198,12 +231,10 @@ export default defineComponent({
     const dateInventory = ref('');
     const description = ref('');
     const { supabase } = useSupabase();
-    const jsonExcel = ref();
-    const items = ref([]);
-    const valor = ref([]);
-    const files = ref(null);
+    let compareRestList = [];
     const mainRestList = ref([]);
-    const generalList = ref([]);
+    let generalList = [];
+    let generalTemplate = [];
     const optionsList = ref([
       {
         label: 'Insumo',
@@ -236,6 +267,9 @@ export default defineComponent({
         dbVal: 7,
       },
     ]);
+    const permiseAll = ref('SuperAdmin,Administradores,Controller,Usuarios');
+    const permiseAdmin = ref('SuperAdmin,Administradores,Controller');
+    const permiseManager = ref('SuperAdmin,Controller');
 
     const schema = {
       IdRest: {
@@ -269,6 +303,7 @@ export default defineComponent({
         type: String,
       },
     };
+
     const columns: QTableProps['columns'] = [
       {
         name: 'Almacen',
@@ -308,7 +343,42 @@ export default defineComponent({
       },
       { name: 'actions', label: 'Actions', field: '', align: 'center' },
     ];
+
     const visibleColumns = ref(['CreateBy', 'CreateAt', 'actions']);
+
+    const optionsTipo = ref([
+      {
+        label: 'Insumo',
+        value: '(I)',
+        dbVal: 1,
+      },
+      {
+        label: 'Producto',
+        value: '(P)',
+        dbVal: 2,
+      },
+      {
+        label: 'Descartable',
+        value: '(D)',
+        dbVal: 6,
+      },
+      {
+        label: 'Consumible',
+        value: '(C)',
+        dbVal: 8,
+      },
+      {
+        label: 'Receta',
+        value: '(R)',
+        dbVal: 3,
+      },
+      {
+        label: 'Derivado',
+        value: '(De)',
+        dbVal: 7,
+      },
+    ]);
+
     const options = ref([
       {
         label: 'Almacen San Isidro',
@@ -337,6 +407,15 @@ export default defineComponent({
     ]);
 
     const rows = ref([]);
+
+    const havePermise = (link) => {
+      if (link.indexOf(userStore.user.Role) !== -1) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
     const humanize = (indate) => {
       const es = moment(indate).locale('es');
       // moment.lang('es',{ago:'hace'});
@@ -379,7 +458,7 @@ export default defineComponent({
               }
             }
 
-            //  $q.localStorage.set('mainList', mainRestList.value);
+            $q.localStorage.set('mainList', mainRestList.value);
 
             return listValue;
           }
@@ -400,6 +479,47 @@ export default defineComponent({
       }
     };
 
+    const generarTemplateList = async (tId, show) => {
+      try {
+        let tempItems = [];
+        generalTemplate = [];
+        if (show === 2) {
+          let result = await supabase.rpc('gettemplatetoexel', {
+            idtemplate: tId,
+          });
+          if (result.status === 200) {
+            tempItems = result.data;
+            // console.log('temps', mainRestList.value);
+            mainRestList.value.map((x: any) => {
+              let index = -1;
+              for (let i = 0, len = tempItems.length; i < len; i++) {
+                if (tempItems[i].item === parseInt(x.item_id)) {
+                  generalTemplate.push({
+                    zona: tempItems[i].zone,
+                    subzona: tempItems[i].subzone,
+                    id: x.item_id,
+                    producto: x.item_descripcion,
+                    tipo: obtenerTipo(x.item_prefijo),
+                    unidadMedida: x.unidadmedidainsumo_descripcion,
+                    stockActual: x.cantidad,
+                    stockContado: tempItems[i].qty ? tempItems[i].qty : 0,
+                  });
+                }
+              }
+            });
+
+            // context.emit('onUpdate', generalList.value);
+          } else {
+            console.log(
+              result.error ? result.error : 'response' + result.statusText
+            );
+          }
+        }
+      } catch (error) {
+        console.log('mark:EDDA40AD3C64', error);
+      }
+    };
+
     const generarTempListaEdit = async (tId, show) => {
       try {
         let tempItems = [];
@@ -415,7 +535,7 @@ export default defineComponent({
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {
                 if (tempItems[i].item === parseInt(x.item_id)) {
-                  generalList.value.push({
+                  generalList.push({
                     id: x.item_id,
                     codigo: x.item_id,
                     producto: x.item_descripcion,
@@ -461,6 +581,7 @@ export default defineComponent({
     const onSearch = async () => {
       try {
         rows.value = [];
+<<<<<<< HEAD
         let dateValue = dateInventory.value;
 
         // Valida y convierte el formato de la fecha si es necesario
@@ -488,19 +609,23 @@ export default defineComponent({
           response.forEach((x) => {
             rows.value.push(x);
           });
+=======
+
+        const _date = moment(dateInventory.value, 'YYYY-MM-DD').format(
+          'YYYY-MM-DD'
+        );
+        const storeFilter = tipo.value ? { store_id: tipo.value.value } : {};
+
+        const { data: responseData, error } = await supabase
+          .from('bizphysicalinventory')
+          .select('*')
+          .eq('create', _date)
+          .match(storeFilter);
+
+        if (responseData) {
+          rows.value = [...responseData];
+>>>>>>> upstream/main
         }
-        // const physical = await supabase.rpc('get_inventory_by_date', {
-        //   fecha: _date,
-        // });
-        // if (physical.status === 200) {
-        //   physical.data.forEach((x) => {
-        //     rows.value.push(x);
-        //   });
-        // } else {
-        //   console.log(
-        //     physical.error ? physical.error : 'result' + physical.statusText
-        //   );
-        // }
       } catch (error) {
         console.log(error);
       }
@@ -536,73 +661,38 @@ export default defineComponent({
       }
     };
 
-    const subirExcel = async () => {
-      try {
-        //const data2 = files.value //document.getElementById('archivoExcel') as HTMLInputElement | null;
-        await readXlsFile(files.value, { schema }).then(({ rows, errors }) => {
-          // `errors` list items have shape: `{ row, column, error, reason?, value?, type? }`.
-          errors.length === 0;
-          jsonExcel.value = rows;
-          // rows === [{
-          //     date: new Date(2018, 2, 24),
-          //     numberOfStudents: 10,
-          //     course: {
-          //     isFree: true,
-          //     title: 'Chemistry'
-          //     },
-          //     contact: '+11234567890',
-          //     status: 'SCHEDULED'
-          // }]
-        });
-        //  jsonExcel.value = await readXlsFile(files.value, { schema })
-        // console.log('devolver el excel', jsonExcel.value);
-
-        verificarExcel(jsonExcel.value);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    function getDifference<T>(a: T[], b: T[]): T[] {
-      return a.filter((element) => {
-        return !b.includes(element);
-      });
-    }
-
-    const verificarExcel = async (data: []) => {
-      let info = [];
-      let containsAll: [];
-      const params = {
-        select: 'IdRest',
-      };
-      const resultAvatar = await Verify.findItem(params);
-      if (resultAvatar.success === 1) {
-        items.value = resultAvatar.originalResponse.body;
-
-        info = data.map((x: any) => {
-          let index = -1;
-          for (let i = 0, len = items.value.length; i < len; i++) {
-            if (items.value[i].IdRest === parseInt(x.IdRest)) {
-              index = i;
-              break;
-            }
-          }
-          if (index === -1) {
-            valor.value.push(x);
-          }
-        });
-
-        //console.log('la diff', valor.value);
-      }
-    };
-
     const setTemplate = async (data) => {
-      generalList.value = [];
+      generalList = [];
       let rowStyle = [];
       const headerTime = moment().format('DD/MM/YYYY hh:mm A');
       $q.loading.show();
       await generarLista(2);
       await generarTempListaEdit(data.row.id, 2);
+
+      const duplicado = generalList.reduce((acumulador, valorActual) => {
+        const elementoYaExiste = acumulador.find(
+          (elemento) => elemento.id === valorActual.id
+        );
+        if (elementoYaExiste) {
+          return acumulador.map((elemento) => {
+            if (elemento.id === valorActual.id) {
+              return {
+                ...elemento,
+                stockContado:
+                  elemento.stockContado !== ''
+                    ? parseFloat(elemento.stockContado) +
+                      parseFloat(valorActual.stockContado)
+                    : 0,
+              };
+            }
+
+            return elemento;
+          });
+        }
+
+        return [...acumulador, valorActual];
+      }, []);
+
       const wb = XLSX.utils.book_new();
       //   const ws = XLSX.utils.json_to_sheet([]);
       const border = {
@@ -1531,7 +1621,7 @@ export default defineComponent({
         row10,
       ];
 
-      generalList.value.forEach((x) => {
+      duplicado.forEach((x) => {
         heading.push([
           {
             v: x.id,
@@ -1742,7 +1832,7 @@ export default defineComponent({
       XLSX.utils.book_append_sheet(wb, ws, 'InsumosYProductosParaCuadre');
 
       // STEP 4: Write Excel file to browser
-      XLSX.writeFile(wb, 'xx.xlsx');
+      XLSX.writeFile(wb, 'plantilladeinventariorestaurant.xlsx');
 
       // eslint-disable-next-line quotes
       console.log(
@@ -1752,12 +1842,20 @@ export default defineComponent({
     };
 
     const createTemplate = async (data) => {
-      generalList.value = [];
+      generalList = [];
       let rowStyle = [];
       const headerTime = moment().format('DD/MM/YYYY hh:mm A');
       $q.loading.show();
       await generarLista(2);
-      await generarTempListaEdit(data.row.id, 2);
+      await generarTemplateList(data.row.id, 2);
+      // console.log('output->generalList.value', generalTemplate.value);
+
+      const result = generalTemplate.reduce((acc, curr) => {
+        acc[curr.zona] = acc[curr.zona] || [];
+        acc[curr.zona].push({ ident: curr });
+        return acc;
+      }, {});
+
       const wb = XLSX.utils.book_new();
       //   const ws = XLSX.utils.json_to_sheet([]);
       const border = {
@@ -1801,13 +1899,18 @@ export default defineComponent({
 
       let row10 = [
         {
-          v: 'ID',
+          v: 'Zona',
           t: 's',
           s: '',
         },
 
         {
-          v: 'Producto/Insumo',
+          v: 'subZona',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Id',
           t: 's',
           s: '',
         },
@@ -1816,99 +1919,113 @@ export default defineComponent({
           t: 's',
           s: '',
         },
+
         {
-          v: 'Unidad Medida',
+          v: 'Producto',
           t: 's',
           s: '',
         },
-
         {
-          v: 'Stock contado',
+          v: 'Unidad',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Cantidad',
           t: 's',
           s: '',
         },
       ];
-      const heading = [row10];
 
-      generalList.value.forEach((x) => {
-        heading.push([
-          {
-            v: x.id,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.codigo,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.producto,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.tipo,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.unidadMedida,
-            t: 's',
-            s: '',
-          },
-          {
-            v: x.stockContado,
-            t: 's',
-            s: '',
-          },
-        ]);
-        // if (i < generalList.value.length) {
-        //   rowStyle[0].v = generalList.value[i].id;
-        //   rowStyle[1].v = generalList.value[i].codigo;
-        //   rowStyle[2].v = generalList.value[i].producto;
-        //   rowStyle[3].v = generalList.value[i].tipo;
-        // }
+      Object.entries(result).forEach(([key, value]) => {
+        const heading = [row10];
+        generalTemplate.forEach((x) => {
+          if (key === x.zona) {
+            heading.push([
+              {
+                v: x.zona,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.subzona,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.id,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.tipo,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.producto,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.unidadMedida,
+                t: 's',
+                s: '',
+              },
+              {
+                v: '',
+                t: 's',
+                s: '',
+              },
+            ]);
+            // if (i < generalList.value.length) {
+            //   rowStyle[0].v = generalList.value[i].id;
+            //   rowStyle[1].v = generalList.value[i].codigo;
+            //   rowStyle[2].v = generalList.value[i].producto;
+            //   rowStyle[3].v = generalList.value[i].tipo;
+            // }
+          }
+        });
+
+        //  heading.push(rowStyle);
+
+        // const merge = { s: { r: 0, c: 0 }, e: { r: 1, c: 2 } };
+        // const merge1 = { s: { r: 0, c: 3 }, e: { r: 1, c: 5 } };
+        // const merge2 = { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } };
+        // const merge3 = { s: { r: 2, c: 3 }, e: { r: 2, c: 5 } };
+        // const merge4 = { s: { r: 3, c: 0 }, e: { r: 3, c: 1 } };
+        // const merge5 = { s: { r: 4, c: 1 }, e: { r: 4, c: 2 } };
+        // const merge6 = { s: { r: 4, c: 5 }, e: { r: 4, c: 6 } };
+        // const merge7 = { s: { r: 4, c: 8 }, e: { r: 4, c: 9 } };
+        // const merge8 = { s: { r: 5, c: 1 }, e: { r: 5, c: 2 } };
+        // const merge9 = { s: { r: 5, c: 4 }, e: { r: 6, c: 4 } };
+        // const merge10 = { s: { r: 5, c: 5 }, e: { r: 6, c: 9 } };
+        // const merge11 = { s: { r: 6, c: 1 }, e: { r: 6, c: 2 } };
+        // const merge12 = { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } };
+
+        // STEP 3: Create Worksheet, add data, set cols widths
+        const ws = XLSX.utils.aoa_to_sheet(heading);
+        //   ws['!cols'] = [{ width: 20 }, { width: 20 }, { width: 40 },{ width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }];
+        //    ws['!rows'] = [{height:23}]
+        if (!ws['!merges']) ws['!merges'] = [];
+        // ws['!merges'].push(merge);
+        // ws['!merges'].push(merge1);
+        // ws['!merges'].push(merge2);
+        // ws['!merges'].push(merge3);
+        // ws['!merges'].push(merge4);
+        // ws['!merges'].push(merge5);
+        // ws['!merges'].push(merge6);
+        // ws['!merges'].push(merge7);
+        // ws['!merges'].push(merge8);
+        // ws['!merges'].push(merge9);
+        // ws['!merges'].push(merge10);
+        // ws['!merges'].push(merge11);
+        // ws['!merges'].push(merge12);
+        $q.loading.hide();
+        //    XLSX.utils.sheet_add_aoa(ws1b,{origin: 'A1'});
+        //   XLSX.utils.sheet_add_json(ws,rows,{ origin: 'A12', skipHeader: true });
+        XLSX.utils.book_append_sheet(wb, ws, key);
       });
-
-      //  heading.push(rowStyle);
-
-      // const merge = { s: { r: 0, c: 0 }, e: { r: 1, c: 2 } };
-      // const merge1 = { s: { r: 0, c: 3 }, e: { r: 1, c: 5 } };
-      // const merge2 = { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } };
-      // const merge3 = { s: { r: 2, c: 3 }, e: { r: 2, c: 5 } };
-      // const merge4 = { s: { r: 3, c: 0 }, e: { r: 3, c: 1 } };
-      // const merge5 = { s: { r: 4, c: 1 }, e: { r: 4, c: 2 } };
-      // const merge6 = { s: { r: 4, c: 5 }, e: { r: 4, c: 6 } };
-      // const merge7 = { s: { r: 4, c: 8 }, e: { r: 4, c: 9 } };
-      // const merge8 = { s: { r: 5, c: 1 }, e: { r: 5, c: 2 } };
-      // const merge9 = { s: { r: 5, c: 4 }, e: { r: 6, c: 4 } };
-      // const merge10 = { s: { r: 5, c: 5 }, e: { r: 6, c: 9 } };
-      // const merge11 = { s: { r: 6, c: 1 }, e: { r: 6, c: 2 } };
-      // const merge12 = { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } };
-
-      // STEP 3: Create Worksheet, add data, set cols widths
-      const ws = XLSX.utils.aoa_to_sheet(heading);
-      //   ws['!cols'] = [{ width: 20 }, { width: 20 }, { width: 40 },{ width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }, { width: 20 },{ width: 20 }, { width: 20 }];
-      //    ws['!rows'] = [{height:23}]
-      if (!ws['!merges']) ws['!merges'] = [];
-      // ws['!merges'].push(merge);
-      // ws['!merges'].push(merge1);
-      // ws['!merges'].push(merge2);
-      // ws['!merges'].push(merge3);
-      // ws['!merges'].push(merge4);
-      // ws['!merges'].push(merge5);
-      // ws['!merges'].push(merge6);
-      // ws['!merges'].push(merge7);
-      // ws['!merges'].push(merge8);
-      // ws['!merges'].push(merge9);
-      // ws['!merges'].push(merge10);
-      // ws['!merges'].push(merge11);
-      // ws['!merges'].push(merge12);
-      $q.loading.hide();
-      //    XLSX.utils.sheet_add_aoa(ws1b,{origin: 'A1'});
-      //   XLSX.utils.sheet_add_json(ws,rows,{ origin: 'A12', skipHeader: true });
-      XLSX.utils.book_append_sheet(wb, ws, 'sheet1');
 
       // STEP 4: Write Excel file to browser
       XLSX.writeFile(wb, 'Template.xlsx');
@@ -1919,6 +2036,278 @@ export default defineComponent({
         `\n--------------------==~==~==~==[ ...DEMO COMPLETE ]==~==~==~==--------------------\n\n`
       );
     };
+
+    const CompareList = async (tId) => {
+      try {
+        console.log('storeid', tId);
+        const params = {
+          store: parseInt(tId),
+          dateInv: moment(dateInventory.value).format(
+            'YYYY-MM-DD' + '%20' + '23:00:00'
+          ),
+          select: '*',
+        };
+        //  console.log('output->params', params);
+        if (compareRestList.length === 0) {
+          for (let i = 0; i < options.value.length; i++) {
+            const restResultItem = await Verify.getRestaurantItems(
+              params,
+              optionsTipo.value[i].dbVal
+            );
+            if (restResultItem.success === 1) {
+              const restModel = restResultItem.originalResponse.body.data;
+              //   console.log('rstmodel' + i, restModel);
+              if (restModel.length > 0 && restModel) {
+                restModel.forEach((x) => {
+                  compareRestList.push(x);
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.log('mark:EDDA40AD3C64', error);
+      }
+    };
+
+    const verify = async (data, show) => {
+      try {
+        compareRestList = [];
+        $q.loading.show();
+        await CompareList(data.store_id);
+        $q.loading.hide();
+        try {
+          let duplicado = [];
+          if (show === 2) {
+            let result = await supabase.rpc('gettemplatetoexel', {
+              idtemplate: data.id,
+            });
+            if (result.status === 200) {
+              duplicado = result.data;
+              const tempItems = duplicado.reduce((acumulador, valorActual) => {
+                const elementoYaExiste = acumulador.find(
+                  (elemento) => elemento.item === valorActual.item
+                );
+                if (elementoYaExiste) {
+                  return acumulador.map((elemento) => {
+                    if (elemento.item === valorActual.item) {
+                      return {
+                        ...elemento,
+                        qty: elemento.qty
+                          ? parseFloat(elemento.qty) +
+                            parseFloat(valorActual.qty)
+                          : 0,
+                      };
+                    }
+
+                    return elemento;
+                  });
+                }
+
+                return [...acumulador, valorActual];
+              }, []);
+              //    console.log(tempItems, 'temp');
+              //    console.log('comp', compareRestList);
+              compareRestList.map((x: any) => {
+                for (let i = 0, len = tempItems.length; i < len; i++) {
+                  if (tempItems[i].item === parseInt(x.item_id)) {
+                    generalTemplate.push({
+                      zona: tempItems[i].zone,
+                      subzona: tempItems[i].subzone,
+                      id: x.item_id,
+                      producto: x.item_descripcion,
+                      tipo: obtenerTipo(x.item_prefijo),
+                      unidadMedida: x.unidadmedidainsumo_descripcion,
+                      stockActual: x.cantidad,
+                      stockContado: tempItems[i].qty ? tempItems[i].qty : 0,
+                    });
+                  }
+                }
+              });
+            } else {
+              console.log(
+                result.error ? result.error : 'response' + result.statusText
+              );
+            }
+          }
+        } catch (error) {
+          console.log('mark:EDDA40AD3C64', error);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const createTemplateManager = async (data) => {
+      generalList = [];
+      console.log('output->data', data);
+      $q.loading.show();
+
+      //await generarLista(2);
+      await verify(data.row, 2);
+      // console.log('output->generalList.value', generalTemplate.value);
+
+      const result = generalTemplate.reduce((acc, curr) => {
+        acc[curr.zona] = acc[curr.zona] || [];
+        acc[curr.zona].push({ ident: curr });
+        return acc;
+      }, {});
+
+      const wb = XLSX.utils.book_new();
+
+      let row10 = [
+        {
+          v: 'Zona',
+          t: 's',
+          s: '',
+        },
+
+        {
+          v: 'subZona',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Id',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Tipo',
+          t: 's',
+          s: '',
+        },
+
+        {
+          v: 'Producto',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Unidad',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Stock',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Cantidad',
+          t: 's',
+          s: '',
+        },
+        {
+          v: 'Diff',
+          t: 's',
+          s: '',
+        },
+      ];
+
+      Object.entries(result).forEach(([key, value]) => {
+        const heading = [row10];
+        generalTemplate.forEach((x) => {
+          if (key === x.zona) {
+            heading.push([
+              {
+                v: x.zona,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.subzona,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.id,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.tipo,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.producto,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.unidadMedida,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.stockActual,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.stockContado,
+                t: 's',
+                s: '',
+              },
+              {
+                v: x.stockActual - x.stockContado,
+                t: 's',
+                s: '',
+              },
+            ]);
+          }
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(heading);
+
+        if (!ws['!merges']) ws['!merges'] = [];
+
+        $q.loading.hide();
+
+        XLSX.utils.book_append_sheet(wb, ws, key);
+      });
+
+      // STEP 4: Write Excel file to browser
+      XLSX.writeFile(wb, 'Template.xlsx');
+
+      // eslint-disable-next-line quotes
+      console.log(
+        // eslint-disable-next-line quotes
+        `\n--------------------==~==~==~==[ ...DEMO COMPLETE ]==~==~==~==--------------------\n\n`
+      );
+    };
+
+    const deleteRow = async (data) => {
+      try {
+        let result = await supabase
+          .from('bizphysicalinventoryzone')
+          .delete()
+          .eq('pi_id', data.row.id);
+        if (result.status === 200) {
+          let result2 = await supabase
+            .from('bizphysicalinventory')
+            .delete()
+            .eq('id', data.row.id);
+          $q.notify({
+            position: 'top',
+            type: 'positive',
+            message: `Se ha eliminado la plantilla ${data.row.Description}`,
+          });
+          await onSearch();
+        }
+        if (result.error) {
+          $q.notify({
+            position: 'top',
+            type: 'negative',
+            message: `Hubo un error al tratar de eliminar ${data.row.Description}`,
+          });
+        }
+      } catch (error) {
+        console.log('output->error', error);
+      }
+    };
+
     return {
       columns,
       rows,
@@ -1936,6 +2325,9 @@ export default defineComponent({
       dato: ref(false),
       showInventory,
       idTemplate,
+      permiseAll,
+      permiseAdmin,
+      permiseManager,
       editRow,
       onCloseCreate,
       onCreateInventory,
@@ -1943,6 +2335,9 @@ export default defineComponent({
       onSearch,
       setTemplate,
       createTemplate,
+      havePermise,
+      createTemplateManager,
+      deleteRow,
       myLocale: {
         /* starting with Sunday */
         days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
@@ -1985,11 +2380,11 @@ export default defineComponent({
   width: 100%;
 }
 
-::v-deep(.q-field__native .q-placeholder) {
+:deep(.q-field__native .q-placeholder) {
   color: white;
 }
 
-::v-deep(.q-field--with-bottom) {
+:deep(.q-field--with-bottom) {
   padding-bottom: 0px;
 }
 </style>

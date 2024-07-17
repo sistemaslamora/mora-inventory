@@ -110,7 +110,9 @@
                 <template v-slot:hint> Obligatorio </template>
               </q-input>
             </div>
+
             <div class="q-pa-md">
+<<<<<<< HEAD
               <q-tree
                 v-bind:nodes="simple"
                 v-bind:accordion="false"
@@ -122,6 +124,19 @@
                 @update:selected="updateSelected"
                 @update:expanded="updateExpanded"
               />
+=======
+              <q-scroll-area style="height: 300px; max-width: 300px">
+                <q-tree
+                  :nodes="simple"
+                  accordion
+                  node-key="idSubZone"
+                  label-key="label"
+                  selected-color="primary"
+                  v-model:selected="selected"
+                  @update:selected="updateSelected"
+                />
+              </q-scroll-area>
+>>>>>>> upstream/main
             </div>
           </template>
 
@@ -214,6 +229,7 @@ export default defineComponent({
     const modelDescription = ref('');
     const { supabase } = useSupabase();
     const first = ref([]);
+    let isSave = true;
 
     const updateExpanded = (newExpanded) => {
       expandedNodes.value = newExpanded;
@@ -255,26 +271,30 @@ export default defineComponent({
 
     const toBack = () => {
       try {
-        $q.dialog({
-          title: 'Confirmar',
-          message:
-            'Esta seguro que desea salir, es posible que no haya guardado',
-          cancel: true,
-          persistent: true,
-        })
-          .onOk(() => {
-            // console.log('>>>> OK')
-            router.go(-1);
+        if (!isSave) {
+          $q.dialog({
+            title: 'Confirmar',
+            message:
+              'Esta seguro que desea salir, es posible que no haya guardado',
+            cancel: true,
+            persistent: true,
           })
-          .onOk(() => {
-            // console.log('>>>> second OK catcher')
-          })
-          .onCancel(() => {
-            // console.log('>>>> Cancel')
-          })
-          .onDismiss(() => {
-            // console.log('I am triggered on both OK and Cancel')
-          });
+            .onOk(() => {
+              // console.log('>>>> OK')
+              router.go(-1);
+            })
+            .onOk(() => {
+              // console.log('>>>> second OK catcher')
+            })
+            .onCancel(() => {
+              // console.log('>>>> Cancel')
+            })
+            .onDismiss(() => {
+              // console.log('I am triggered on both OK and Cancel')
+            });
+        } else {
+          router.go(-1);
+        }
       } catch (error) {
         console.log('mark:EF7259BC17FC', error);
       }
@@ -284,7 +304,7 @@ export default defineComponent({
       for (let i = 0; i < listItems.value.length; i++) {
         for (let j = 0; j < arr.length; j++) {
           if (listItems.value[i].idZone === arr[j].idZone) {
-            console.log(i);
+            //  console.log(i);
             listItems.value.splice(i, 1);
             i = 0;
           }
@@ -297,7 +317,7 @@ export default defineComponent({
       for (let i = 0; i < listItems.value.length; i++) {
         for (let j = 0; j < arr.length; j++) {
           if (listItems.value[i].idSubZone === arr[j].idSubZone) {
-            console.log(i);
+            // console.log(i);
             listItems.value.splice(i, 1);
             i = 0;
           }
@@ -354,6 +374,7 @@ export default defineComponent({
     };
 
     const onImportData = async (json) => {
+      isSave = false;
       showImport.value = false;
 
       if (json.length > 0) {
@@ -367,7 +388,7 @@ export default defineComponent({
             item_descripcion: x.item_descripcion,
           };
         });
-        console.log('arr', arr);
+        // console.log('arr', arr);
 
         const t = simple.value[0];
         selected.value = t.children[0].idSubZone;
@@ -417,6 +438,7 @@ export default defineComponent({
                 params,
                 options.value[i].dbVal
               );
+              //  console.log(restResultItem);
               if (restResultItem.success === 1) {
                 listValue = true;
                 const restModel = restResultItem.originalResponse.body.data;
@@ -439,9 +461,21 @@ export default defineComponent({
       }
     };
 
+    const callData = async (id) => {
+      try {
+        dualList.value.loadingList(false, 1);
+        await dualList.value?.generarTempLista(id, '2');
+
+        //  console.log('respose', response.value);
+      } catch (error) {
+        console.log('mark:9C02C7578EEE', error);
+      }
+    };
+
     onMounted(async () => {
       try {
         dualList.value.loadingList(true, props.show);
+        await dualList.value?.clearList();
         await generarLista('1');
         await dualList.value?.generarLista(mainRestList.value);
         if (props.show === '0') {
@@ -503,8 +537,12 @@ export default defineComponent({
         } else {
           router.push('/managerinventorytemplate');
         }
+<<<<<<< HEAD
         console.log(simple.value)
         console.log('respose', response.value);
+=======
+        //  console.log('respose', response.value);
+>>>>>>> upstream/main
       } catch (error) {
         console.log('mark:4B67FB683345', error);
       }
@@ -540,12 +578,13 @@ export default defineComponent({
         return;
       }
       done = simple.value;
-      console.log(done, 'done');
+      // console.log(done, 'done');
     };
 
     const checkData = async (data: any[]) => {
       try {
         if (data) {
+          isSave = false;
           visible.value = '1';
           // const params = {
           //   store: '6',
@@ -733,23 +772,20 @@ export default defineComponent({
 
     const createItems = async (id) => {
       try {
-        let data = [];
-        listItems.value.forEach((element) => {
-          data.push({
-            pls_plz_pli_id: id,
-            pls_plz_id: element.idZone,
-            pls_id: element.idSubZone,
-            item: parseInt(element.item_id),
-          });
-        });
-        //  const template = await Verify.createInventoryTemplate(params);
+        const data = listItems.value.map((element) => ({
+          pls_plz_pli_id: id,
+          pls_plz_id: element.idZone,
+          pls_id: element.idSubZone,
+          item: parseInt(element.item_id),
+        }));
 
         const { error } = await supabase.from('biztemplateitem').insert(data);
         if (error) {
-          console.log(error);
+          throw new Error(error.message);
         }
       } catch (error) {
-        console.log('mark:E2D87765FE56', error);
+        console.error('mark:E2D87765FE56', error);
+        throw new Error('Error al crear los elementos.');
       }
     };
 
@@ -763,6 +799,7 @@ export default defineComponent({
 
     const saveAll = async () => {
       try {
+        isSave = true;
         if (verifyDescription() && verifyTreeData() && verifyItems()) {
           const tId = listItems.value[0].idTemplate
             ? listItems.value[0].idTemplate
@@ -774,9 +811,10 @@ export default defineComponent({
             $q.notify({
               position: 'top',
               type: 'positive',
-              message: `Se ha creado la plantila ${modelDescription.value}`,
+              message: `Se han guardado los cambios en la plantila ${modelDescription.value}`,
             });
-            router.push('/managerinventorytemplate');
+            await callData(tId);
+            // router.push('/managerinventorytemplate');
           }
         } else {
           showNotif(message);
@@ -788,8 +826,9 @@ export default defineComponent({
     };
 
     const onUpdateItems = (data) => {
+      isSave = false;
       listItems.value = data;
-      console.log('listitems', data);
+      //  console.log('listitems', data);
     };
 
     return {

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-use-v-if-with-v-for -->
 <template>
   <q-layout view="hHh lpR fFf" class="bg-grey-1">
     <q-header elevated class="bg-white text-grey-8" height-hint="64">
@@ -64,26 +65,26 @@
       show-if-above
       bordered
       class="bg-white"
-      :width="240"
+      :width="250"
     >
       <q-scroll-area class="fit">
         <q-list padding class="text-grey-8">
-          <q-item
-            class="__drawer-item"
-            v-ripple
-            v-for="link in links1"
-            :key="link.text"
-            clickable
-            :to="link.route"
-          >
-            <q-item-section avatar>
-              <q-icon :name="link.icon" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ link.text }}</q-item-label>
-            </q-item-section>
-          </q-item>
-
+          <div v-for="link in links1" :key="link.text">
+            <q-item
+              class="__drawer-item"
+              v-ripple
+              clickable
+              :to="link.route"
+              v-if="havePermise(link)"
+            >
+              <q-item-section avatar>
+                <q-icon :name="link.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ link.text }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </div>
           <!-- <q-separator
             inset
             class="q-my-sm"
@@ -158,7 +159,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { fasEarthAmericas, fasFlask } from '@quasar/extras/fontawesome-v6';
 import AuthAccountMenu from '../auth/components/AccountMenu/AccountMenu.vue';
 import {
@@ -166,12 +167,17 @@ import {
   useIdentityPasswordLogin,
   useAuthState,
 } from '@vueauth/core';
+import useSupabase from '../boot/supabase';
+import { useUserStore } from '../stores/roles';
+import { useitemsTemplateStore } from '../stores/itemsTemplate';
+import { useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
 
 const { user } = useAuthState();
 const { identity } = useIdentityPasswordLogin();
-
-//console.log('user', user)
+const { supabase } = useSupabase();
 //console.log('identity', identity)
+const $q = useQuasar();
 const leftDrawerOpen = ref(false);
 const search = ref('');
 const showAdvanced = ref(false);
@@ -181,7 +187,52 @@ const hasWords = ref('');
 const excludeWords = ref('');
 const byWebsite = ref('');
 const byDate = ref('Any time');
+const userStore = useUserStore();
+const router = useRouter();
+const useItems = useitemsTemplateStore();
+const permiseRole = 'SuperAdmin';
+onMounted(async () => {
+  let role = await supabase
+    .from('bizrolebyuser')
+    .select('*,bizrole(*)')
+    // Filters
+    .eq('userid', user.value.id);
 
+  if (role.data.length == 0) {
+    const { data, error } = await supabase.from('bizrolebyuser').insert([
+      {
+        roleid: '2b6043a0-b54d-4343-a692-abbf90b74d79',
+        userid: user.value.id,
+        email: user.value.email,
+      },
+    ]);
+    console.log(error);
+    let info = {
+      UserId: user.value.id,
+      RoleId: '2b6043a0-b54d-4343-a692-abbf90b74d79',
+      Role: 'NA',
+      Email: user.value.email,
+    };
+    userStore.addUserRole(info);
+  } else {
+    //  console.log('output->role.data.bizrole.role', role.data[0].bizrole?.role);
+    let info = {
+      UserId: user.value.id,
+      RoleId: role.data[0].roleid,
+      Role: role.data[0].bizrole.role,
+      Email: role.data[0].email,
+    };
+    userStore.addUserRole(info);
+  }
+});
+
+function havePermise(link) {
+  if (link.permise.indexOf(userStore.user.Role) !== -1) {
+    return true;
+  } else {
+    return false;
+  }
+}
 function onClear() {
   exactPhrase.value = '';
   hasWords.value = '';
@@ -204,16 +255,40 @@ const authProviderUpperFirst =
 const userEmail = ref(user.value.email);
 
 const links1 = ref([
-  { icon: 'web', text: 'Escritorio', route: '/dashboard' },
   {
-    icon: 'memory',
-    text: 'Plantilla de Inventario',
-    route: '/managerinventorytemplate',
+    icon: 'fas fa-desktop',
+    text: 'Escritorio',
+    route: '/dashboard',
+    permise: 'SuperAdmin,Administradores,Controller,Usuarios',
+    //click: '',
   },
   {
-    icon: 'star_border',
+    icon: 'fas fa-dolly-flatbed',
+    text: 'Plantilla de Inventario',
+    route: '/managerinventorytemplate',
+    permise: 'SuperAdmin,Controller',
+    //click: '',
+  },
+  {
+    icon: 'fas fa-check-double',
     text: 'Inventario Físico',
     route: '/managerinventory',
+    permise: 'SuperAdmin,Administradores,Controller,Usuarios',
+    //click: '',
+  },
+  {
+    icon: 'fas fa-user-tag',
+    text: 'Usuario Role',
+    route: '/userrole',
+    permise: 'SuperAdmin',
+    //click: '',
+  },
+  {
+    icon: 'fas fa-user-tag',
+    text: 'Precios x Canal',
+    route: '/precioxcanal',
+    permise: 'SuperAdmin,Controller',
+    //click: 'generatePivot()',
   },
   // { icon: 'settings', text: 'Generar Inventario', route: '/managerinventory' }
 ]);
