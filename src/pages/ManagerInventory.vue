@@ -581,7 +581,6 @@ export default defineComponent({
     const onSearch = async () => {
       try {
         rows.value = [];
-<<<<<<< HEAD
         let dateValue = dateInventory.value;
 
         // Valida y convierte el formato de la fecha si es necesario
@@ -609,22 +608,6 @@ export default defineComponent({
           response.forEach((x) => {
             rows.value.push(x);
           });
-=======
-
-        const _date = moment(dateInventory.value, 'YYYY-MM-DD').format(
-          'YYYY-MM-DD'
-        );
-        const storeFilter = tipo.value ? { store_id: tipo.value.value } : {};
-
-        const { data: responseData, error } = await supabase
-          .from('bizphysicalinventory')
-          .select('*')
-          .eq('create', _date)
-          .match(storeFilter);
-
-        if (responseData) {
-          rows.value = [...responseData];
->>>>>>> upstream/main
         }
       } catch (error) {
         console.log(error);

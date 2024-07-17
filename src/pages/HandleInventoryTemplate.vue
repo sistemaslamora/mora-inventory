@@ -112,23 +112,10 @@
             </div>
 
             <div class="q-pa-md">
-<<<<<<< HEAD
-              <q-tree
-                v-bind:nodes="simple"
-                v-bind:accordion="false"
-                v-model:expanded.sync="expandedNodes"
-                node-key="idSubZone"
-                label-key="label"
-                selected-color="primary"
-                v-model:selected="selected"
-                @update:selected="updateSelected"
-                @update:expanded="updateExpanded"
-              />
-=======
               <q-scroll-area style="height: 300px; max-width: 300px">
                 <q-tree
                   :nodes="simple"
-                  accordion
+                  v-bind:accordion="false"
                   node-key="idSubZone"
                   label-key="label"
                   selected-color="primary"
@@ -136,7 +123,6 @@
                   @update:selected="updateSelected"
                 />
               </q-scroll-area>
->>>>>>> upstream/main
             </div>
           </template>
 
@@ -537,12 +523,7 @@ export default defineComponent({
         } else {
           router.push('/managerinventorytemplate');
         }
-<<<<<<< HEAD
-        console.log(simple.value)
-        console.log('respose', response.value);
-=======
         //  console.log('respose', response.value);
->>>>>>> upstream/main
       } catch (error) {
         console.log('mark:4B67FB683345', error);
       }

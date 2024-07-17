@@ -21,13 +21,8 @@ authenticatedRedirector.onChecked.value = () => Loading.hide();
 unauthenticatedRedirector.onChecked.value = () => Loading.hide();
 
 router.isReady().then(() => {
-<<<<<<< HEAD
-  const route = unref(router.currentRoute)
-  //console.log(route, 'route')
-=======
   const route = unref(router.currentRoute);
 
->>>>>>> upstream/main
   if (route.meta.authOnly) {
     Loading.show();
     unauthenticatedRedirector.execOnAuthStateEnsured();
