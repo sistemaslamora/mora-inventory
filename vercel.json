@@ -31,10 +31,7 @@
         },
         {
           "key": "x-authorized",
-          "value": "true",
-          "conditions": [
-            { "type": "query", "key": "authorized", "value": "true" }
-          ]
+          "value": "true"
         }
       ]
     }
