@@ -357,7 +357,7 @@ export default defineComponent({
         let listValue = false;
         const params = {
           store: '6',
-          dateInv: moment().format('YYYY-MM-DD' + '%20' + 'HH:mm:00'),
+          dateInv: moment().format('YYYY-MM-DDTHH:mm:00'),
           select: '*',
         };
         if (show !== '0' && show !== '') {
@@ -461,12 +461,28 @@ export default defineComponent({
     const onSearch = async () => {
       try {
         rows.value = [];
-        let _date = moment(dateInventory.value).format('YYYY-MM-DD');
+        let dateValue = dateInventory.value;
+
+        // Valida y convierte el formato de la fecha si es necesario
+        if (moment(dateValue, 'YYYY/MM/DD', true).isValid()) {
+          dateValue = moment(dateValue, 'YYYY/MM/DD').format('YYYY-MM-DD');
+        } else if (!moment(dateValue, moment.ISO_8601, true).isValid()) {
+          console.error('La fecha proporcionada no es válida:', dateValue);
+          // Manejar el caso de fecha no válida
+          return;
+        }
+
+        let _date = moment(dateValue).format('YYYY-MM-DD');
         let { data: response, error } = await supabase
           .from('bizphysicalinventory')
           .select('*')
-          // Filters
           .eq('create', _date);
+
+        if (error) {
+          console.error('Error al realizar la consulta:', error);
+        } else {
+          console.log('Respuesta de la consulta:', response);
+        }
         // console.log(response, 'responseCreate');
         if (response) {
           response.forEach((x) => {

@@ -141,7 +141,7 @@ export default defineComponent({
           }
         });
 
-        console.log('la diff', valor.value);
+     //   console.log('la diff', valor.value);
       }
     };
 

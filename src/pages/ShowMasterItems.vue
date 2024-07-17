@@ -1,7 +1,7 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <template>
-  <q-page >    
- 
+  <q-page >
+
 
    <div class='q-pa-md'>
     <q-file
@@ -34,11 +34,11 @@ export default defineComponent({
   name: 'ToExcel',
   components: {  },
   setup () {
-    
+
     //vars
 
-     const items = ref([])   
-    
+     const items = ref([])
+
      const files = ref(null)
     //methods
     const subirExcel = async() =>{
@@ -46,24 +46,24 @@ export default defineComponent({
              const data2 = files.value  //document.getElementById('archivoExcel') as HTMLInputElement | null;
 
              items.value = await readXlsFile(data2?.files[0])
-             console.log(items.value)
-             
+           //  console.log(items.value)
+
         }
         catch (error) {
             console.log(error)
         }
     }
 
-   
 
-  
-    return { 
-             //vars  
-             items,  
+
+
+    return {
+             //vars
+             items,
              files,
              //methods
              subirExcel,
-           
+
            };
   }
 });

@@ -19,7 +19,7 @@ unauthenticatedRedirector.onChecked.value = () => Loading.hide()
 
 router.isReady().then(() => {
   const route = unref(router.currentRoute)
-  console.log(route, 'route')
+  //console.log(route, 'route')
   if (route.meta.authOnly) {
     Loading.show()
     unauthenticatedRedirector.execOnAuthStateEnsured()

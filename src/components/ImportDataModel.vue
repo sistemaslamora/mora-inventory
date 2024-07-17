@@ -1,6 +1,5 @@
 <template>
   <div class="q-pa-md q-gutter-sm">
-
     <q-dialog
       v-model="prompt"
       persistent
@@ -9,22 +8,15 @@
         <q-card-section>
           <div class="text-h6">Selecciona la Plantilla</div>
         </q-card-section>
-
         <q-card-section class="q-pt-none">
-
-          <div
-            class=""
-            id="app"
-          >
+          <div id="app">
             <input
               type="file"
               accept="application/json"
               @change="onFileChange"
             >
           </div>
-
         </q-card-section>
-
         <q-card-actions
           align="right"
           class="text-primary"
@@ -34,7 +26,6 @@
             label="Cerrar"
             v-close-popup
           />
-
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -43,35 +34,39 @@
 
 <script lang="ts">
 import { ref } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
-export default {
-  emits: ['import'],
+export default defineComponent({
+  name: 'ImportDataModel',
   props: {
-    //
+    onImport: {
+      type: Function as PropType<(data: any) => void>,
+      required: true,
+    },
   },
-  setup(props, context: any) {
-    let json = ref(null);
-    const onFileChange = (e) => {
-      let files = e.target.files || e.dataTransfer.files;
-      if (!files.length) return;
+  setup(props) {
+    const json = ref(null);
+
+    const onFileChange = (e: Event) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || !files.length) return;
       readFile(files[0]);
     };
-    const readFile = (file) => {
-      let reader = new FileReader();
-      reader.onload = (e) => {
-        let str: string | ArrayBuffer = e.target.result;
-        json.value = JSON.parse(str.toString());
-        context.emit('import', json.value);
-      };
 
+    const readFile = (file: File) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const str = e.target?.result as string;
+        json.value = JSON.parse(str);
+        props.onImport(json.value);
+      };
       reader.readAsText(file);
     };
 
     return {
       prompt: ref(true),
       onFileChange,
-      readFile,
     };
   },
-};
+});
 </script>

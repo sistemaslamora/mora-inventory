@@ -57,7 +57,7 @@
               <div class="q-pa-md">
                 <q-tree
                   :nodes="simple"
-                  accordion
+                  v-bind:accordion="false"
                   node-key="idSubZone"
                   selected-color="primary"
                   v-model:selected="selected"
@@ -360,7 +360,7 @@ export default {
         let listValue = false;
         const params = {
           store: '6',
-          dateInv: moment().format('YYYY-MM-DD' + '%20' + 'HH:mm:00'),
+          dateInv: moment().format('YYYY-MM-DDTHH:mm:00'),
           select: '*',
         };
         if (show !== '0' && show !== '') {
@@ -792,6 +792,7 @@ export default {
           simple.value.push({
             label: element.Description,
             idZone: element.PLZ_Id,
+            idSubZone:uid(),
             type: 'father',
             icon: 'fa-solid fa-map-location-dot',
             selectable: false,
@@ -852,6 +853,7 @@ export default {
           simple.value.push({
             label: element.description,
             idZone: element.piz_id,
+            idSubZone:uid(),
             type: 'father',
             icon: 'fa-solid fa-map-location-dot',
             selectable: false,
@@ -916,7 +918,7 @@ export default {
             .eq('pis_piz_pi_id', idTemplate.value);
           if (result.status === 200) {
             tempItems = result.data;
-            console.log('comp', compareRestList.value);
+           // console.log('comp', compareRestList.value);
             compareRestList.value.map((x: any) => {
               let index = -1;
               for (let i = 0, len = tempItems.length; i < len; i++) {

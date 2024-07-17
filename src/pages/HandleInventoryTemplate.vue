@@ -37,7 +37,7 @@
           size="12px"
           no-caps
           @click="showZone()"
-          @ok="checkData()"
+          @ok="checkData"
           label="Editar Zonas"
           icon="fa-solid fa-map-location-dot"
           style="line-height: 1.5rem"
@@ -112,13 +112,15 @@
             </div>
             <div class="q-pa-md">
               <q-tree
-                :nodes="simple"
-                accordion
+                v-bind:nodes="simple"
+                v-bind:accordion="false"
+                v-model:expanded.sync="expandedNodes"
                 node-key="idSubZone"
                 label-key="label"
                 selected-color="primary"
                 v-model:selected="selected"
                 @update:selected="updateSelected"
+                @update:expanded="updateExpanded"
               />
             </div>
           </template>
@@ -206,11 +208,17 @@ export default defineComponent({
     const response = ref(false);
     const mainRestList = ref([]);
     let subzone = [];
+    const expandedNodes = ref([]);
     let message = '';
     let templateId = 0;
     const modelDescription = ref('');
     const { supabase } = useSupabase();
     const first = ref([]);
+
+    const updateExpanded = (newExpanded) => {
+      expandedNodes.value = newExpanded;
+      console.log(expandedNodes.value)
+    };
 
     const options = ref([
       {
@@ -332,6 +340,7 @@ export default defineComponent({
         if (y.plz_id === zoneId) {
           arr.push({
             label: y.description,
+           // especial:y.description+'@'+y.pls_id,
             idZone: y.plz_id,
             idSubZone: y.pls_id,
             icon: 'fa-solid fa-location-dot',
@@ -478,6 +487,8 @@ export default defineComponent({
           zoneSort.forEach((element) => {
             simple.value.push({
               label: element.Description,
+             // especial:element.Description+'@'+element.PLZ_Id,
+              idSubZone:uid(),
               idZone: element.PLZ_Id,
               type: 'father',
               icon: 'fa-solid fa-map-location-dot',
@@ -492,6 +503,7 @@ export default defineComponent({
         } else {
           router.push('/managerinventorytemplate');
         }
+        console.log(simple.value)
         console.log('respose', response.value);
       } catch (error) {
         console.log('mark:4B67FB683345', error);
@@ -500,6 +512,8 @@ export default defineComponent({
 
     //NOTE - TENGO QUE USAR ESETA FUNCION DE UPDATE SELECT PARA CARGAR TODOS LOS ITEMS A LA LISTA
     const updateSelected = (target) => {
+     // let splitted = target.split("@");
+     // let buscar = splitted[1] === "idSubZone" ? splitted[2] : 0
       if (target) {
         simple.value.forEach((e) => {
           const toSelected = e.children.find((x) => x.idSubZone === target);
@@ -517,6 +531,8 @@ export default defineComponent({
         });
       }
     };
+
+
 
     const onLazyLoad = ({ node, key, done, fail }) => {
       if (node.length < 1) {
@@ -541,6 +557,8 @@ export default defineComponent({
           data.forEach((element) => {
             simple.value.push({
               label: element.name,
+             // especial:element.name+'@idZone@'+element.idZone,
+              idSubZone:uid(),
               idZone: element.idZone,
               type: 'father',
               icon: 'fa-solid fa-map-location-dot',
@@ -549,6 +567,7 @@ export default defineComponent({
               children: element.subZone?.map((y) => {
                 return {
                   label: y.nameSubZone,
+                 // especial:y.nameSubZone+'@idSubZone@'+y.idSubZone,
                   idZone: element.idZone,
                   idSubZone: y.idSubZone,
                   icon: 'fa-solid fa-location-dot',
@@ -794,6 +813,8 @@ export default defineComponent({
       exportData,
       onImportData,
       onLazyLoad,
+      updateExpanded,
+      expandedNodes,
     };
   },
 });

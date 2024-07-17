@@ -4,8 +4,8 @@ import RemoteClient from '../utils/RemoteClient'
 import CommonConstants from '../utils/CommonContants'
 import CommonUtils from '../utils/CommonUtils'
 import LoggerManager from '../utils/LoggerManager'
-import { BASEURL,          
-         HEADERS,         
+import { BASEURL,
+         HEADERS,
         } from '../utils/config';
 import { OriginalResponse } from '../references/models'
 import { responseInterceptor, errorInterceptor } from '../utils/interceptor'
@@ -26,12 +26,12 @@ const PATH_TEMPLATE_ITEMS: string | undefined = '/biztemplateitem'
 
 export default class ItemService {
 
-   
 
-    static findItem = async (data) => { 
+
+    static findItem = async (data) => {
 
         let nullable: OriginalResponse | null | undefined
-        
+
         const baseUrl: string = BASEURL+PATH_MAIN_ITEMS
          const result = {
             success: 0,
@@ -73,7 +73,7 @@ export default class ItemService {
                     params: data,
                     body: null,
                 },
-                
+
             )
 
             if (response.statusCode === 200) {
@@ -145,17 +145,17 @@ export default class ItemService {
         catch (error) {
 
            void LoggerManager.error( '2993CF1DFFF7', 'Error Service Dispatcher => getBusinessKind', {sendToExternal:false,notSendToStorage:false,data:error} )
-            
+
         }
 
         return result
 
     }
 
-    static getInventoryTemplate = async (data) => { 
+    static getInventoryTemplate = async (data) => {
 
         let nullable: OriginalResponse | null | undefined
-        
+
         const baseUrl: string = BASEURL+PATH_INVENTORY_TEMPLATE_ITEMS
          const result = {
             success: 0,
@@ -197,7 +197,7 @@ export default class ItemService {
                     params: data,
                     body: null,
                 },
-                
+
             )
 
             if (response.statusCode === 200) {
@@ -269,17 +269,17 @@ export default class ItemService {
         catch (error) {
 
            void LoggerManager.error( '2993CF1DFFF7', 'Error Service Dispatcher => getBusinessKind', {sendToExternal:false,notSendToStorage:false,data:error} )
-            
+
         }
 
         return result
 
     }
 
-    static getItemsTemplate = async (data) => { 
+    static getItemsTemplate = async (data) => {
 
         let nullable: OriginalResponse | null | undefined
-        
+
         const baseUrl: string = BASEURL+PATH_TEMPLATE_ITEMS
          const result = {
             success: 0,
@@ -321,7 +321,7 @@ export default class ItemService {
                     params: data,
                     body: null,
                 },
-                
+
             )
 
             if (response.statusCode === 200) {
@@ -393,7 +393,7 @@ export default class ItemService {
         catch (error) {
 
            void LoggerManager.error( '2993CF1DFFF7', 'Error Service Dispatcher => getBusinessKind', {sendToExternal:false,notSendToStorage:false,data:error} )
-            
+
         }
 
         return result
@@ -401,9 +401,9 @@ export default class ItemService {
     }
 
     static createInventoryTemplate = async (data) => {
-     
+
     const baseUrl: string | undefined =  BASEURL+PATH_INVENTORY_TEMPLATE_ITEMS
-    
+
     const result = {
       success: 0,
       feedback: {
@@ -437,12 +437,12 @@ export default class ItemService {
             ...HEADERS,
              apiKey: process.env.SUPABASE_API_KEY_PUBLIC,
              Authorization: process.env.SUPABASE_AUTHORIZATION_PUBLIC
-            
+
           },
           params: null,
           body: data,
         },
-        
+
       )
 
       await LoggerManager.log('D75C0B3A55E9', 'Logout', response)
@@ -450,7 +450,7 @@ export default class ItemService {
 
       if (response.statusCode < 210 ) {
         result.success = 1
-        console.log('rsponse',response)
+        //console.log('rsponse',response)
         if (response.body && Array.isArray(response.body.Data)) {
           result.body = response.body.Data
         }
@@ -506,17 +506,17 @@ export default class ItemService {
      void LoggerManager.error(
         '3BC5D9FF85C3',
         'Error Service Logout => logout',
-        {sendToExternal:false,notSendToStorage:false,data:error} 
+        {sendToExternal:false,notSendToStorage:false,data:error}
       )
     }
 
     return result
     }
 
-    static getRestaurantItems = async (data,format) => { 
+    static getRestaurantItems = async (data,format) => {
 
         let nullable: OriginalResponse | null | undefined
-        
+
         const baseUrl = `https://lamora.restaurant.pe/restaurant/public/rest/local/getStockParaCuadre/${data.store}/-1/${format}/${data.dateInv}` //2022-09-02%2020:00:00
          const result = {
             success: 0,
@@ -531,7 +531,7 @@ export default class ItemService {
             body: null?null:{},
             originalResponse: nullable
         }
-      
+
         try {
 
             const response = await RemoteClient.callRemoteService(
@@ -558,13 +558,13 @@ export default class ItemService {
                     params: null,
                     body: null,
                 },
-                
+
             )
-              
+
             if (response.statusCode === 200) {
 
                 result.success = 1
-            
+
                 if (response.body &&
                     Array.isArray(response.body.Data)) {
 
@@ -630,7 +630,7 @@ export default class ItemService {
         catch (error) {
 
            void LoggerManager.error( '2993CF1DFFF7', 'Error Service Dispatcher => getBusinessKind', {sendToExternal:false,notSendToStorage:false,data:error} )
-            
+
         }
 
         return result
@@ -639,9 +639,9 @@ export default class ItemService {
     // static exampleGet = async (user: User) => {
 
     //     let nullable: OriginalResponse | null | undefined
-        
+
     //     const baseUrl: string = BASEURL + AUTHURL + '/login'
-        
+
     //      const result = {
     //         success: 0,
     //         feedback: {
@@ -681,7 +681,7 @@ export default class ItemService {
     //                 params: user,
     //                 body: null,
     //             },
-                
+
     //         )
 
     //         if (response.statusCode === 200) {
@@ -753,12 +753,12 @@ export default class ItemService {
     //     catch (error) {
 
     //        void LoggerManager.error( '2993CF1DFFF7', 'Error Service Dispatcher => getBusinessKind', {sendToExternal:false,notSendToStorage:false,data:error} )
-            
+
     //     }
 
     //     return result
 
     // }
 
-    
+
 }

@@ -190,7 +190,7 @@
                           ></q-input>
                         </q-popup-edit>
                       </q-td>
-                      <!-- 
+                      <!--
                       <q-td
                         key="fat"
                         :props="props"
@@ -854,6 +854,7 @@ export default {
         zoneSort.forEach((element) => {
           simple.value.push({
             label: element.Description,
+            idSubZone:uid(),
             idZone: element.PLZ_Id,
             type: 'father',
             icon: 'fa-solid fa-map-location-dot',
@@ -914,6 +915,7 @@ export default {
         zoneSort.forEach((element) => {
           simple.value.push({
             label: element.description,
+            idSubZone:uid(),
             idZone: element.piz_id,
             type: 'father',
             icon: 'fa-solid fa-map-location-dot',
