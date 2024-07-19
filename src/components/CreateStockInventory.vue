@@ -137,6 +137,10 @@ export default {
         value: '5',
       },
       {
+        label: 'Almacen Real',
+        value: '6',
+      },
+      {
         label: 'Almacen Planta Produccion',
         value: '15',
       },
