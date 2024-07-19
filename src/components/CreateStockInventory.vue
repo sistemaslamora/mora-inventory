@@ -141,6 +141,10 @@ export default {
         value: '6',
       },
       {
+        label: 'Almacen Basadre',
+        value: '6',
+      },
+      {
         label: 'Almacen Planta Produccion',
         value: '15',
       },
