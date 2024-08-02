@@ -410,20 +410,7 @@ export default defineComponent({
     // );
 
     const generarLista = async (show) => {
-      const url = 'https://corsproxy.io/?' + encodeURIComponent('https://lamora.restaurant.pe/restaurant/public/rest/local/getStockParaCuadre/6/-1/1/2024-08-02%2001:31:00');
-      fetch(url)
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
-  .then(data => {
-    console.log(data);
-  })
-  .catch(error => {
-    console.error('There has been a problem with your fetch operation:', error);
-  });
+
       try {
 
         let listValue = false;
@@ -439,7 +426,7 @@ export default defineComponent({
                 params,
                 options.value[i].dbVal
               );
-               console.log(restResultItem);
+              // console.log(restResultItem);
               if (restResultItem.success === 1) {
                 listValue = true;
                 const restModel = restResultItem.originalResponse.body.data;
