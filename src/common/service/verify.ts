@@ -564,7 +564,11 @@ export default class ItemService {
   static getRestaurantItems = async (data, format) => {
     let nullable: OriginalResponse | null | undefined;
 
-    const baseUrl = `https://lamora.restaurant.pe/restaurant/public/rest/local/getStockParaCuadre/${data.store}/-1/${format}/${data.dateInv}`; //2022-09-02%2020:00:00
+    const baseUrl =
+      'https://corsproxy.io/?' +
+      encodeURIComponent(
+        `https://lamora.restaurant.pe/restaurant/public/rest/local/getStockParaCuadre/${data.store}/-1/${format}/${data.dateInv}`
+      ); //2022-09-02%2020:00:00
     const result = {
       success: 0,
       feedback: {

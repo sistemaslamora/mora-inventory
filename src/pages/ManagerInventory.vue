@@ -188,7 +188,7 @@
     :templateId="idTemplate"
     :handleInventory="handleInventory"
     :store="storeName"
-    :storeId="storeId"
+    :storeId="storeId.toString()"
     :description="description"
     @onClose="onClosePhysycalInventory"
   />

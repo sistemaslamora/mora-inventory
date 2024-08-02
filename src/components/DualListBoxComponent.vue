@@ -191,14 +191,15 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import Verify from '../common/service/verify';
 import readXlsFile from 'read-excel-file';
+import { QTableProps } from 'quasar';
 
 const columnsDb = [
   {
     name: 'idrest',
     label: 'Id',
     align: 'left',
-    field: (row) => row.item_id,
-    format: (val) => `${val}`,
+    field: (row:any) => row.item_id,
+    format: (val:any) => `${val}`,
     sortable: true,
   },
   {
@@ -206,19 +207,19 @@ const columnsDb = [
     required: true,
     label: 'Item',
     align: 'left',
-    field: (row) => row.item_descripcion,
-    format: (val) => `${val}`,
+    field: (row:any) => row.item_descripcion,
+    format: (val:any) => `${val}`,
     sortable: true,
   },
-];
+] as QTableProps['columns'];
 
 const columnsTemp = [
   {
     name: 'idrest',
     label: 'Id',
     align: 'left',
-    field: (row) => row.item_id,
-    format: (val) => `${val}`,
+    field: (row:any) => row.item_id,
+    format: (val:any) => `${val}`,
     sortable: true,
   },
   {
@@ -226,11 +227,11 @@ const columnsTemp = [
     required: true,
     label: 'Item',
     align: 'left',
-    field: (row) => row.item_descripcion,
-    format: (val) => `${val}`,
+    field: (row:any) => row.item_descripcion,
+    format: (val:any) => `${val}`,
     sortable: true,
   },
-];
+]as QTableProps['columns'];
 
 export default {
   emits: ['onUpdate'],
